@@ -67,7 +67,7 @@ lib/
 
 ## 📥 Download
 
-[![Download APK](https://img.shields.io/badge/Download-APK-blue?style=for-the-badge&logo=android)](https://github.com/rebarakaz/bacapetra_app/releases/latest/download/app-release.apk)
+[![Download APK](https://img.shields.io/badge/Download-APK-blue?style=for-the-badge&logo=android)](https://github.com/rebarakaz/bacapetra_app/releases/latest/download/BacaPetra-v1.0.0-Initial-Release.apk)
 
 **Latest Release:** [v1.0.0](https://github.com/rebarakaz/bacapetra_app/releases/tag/v1.0.0)
 
