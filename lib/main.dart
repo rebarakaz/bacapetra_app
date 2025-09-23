@@ -1,0 +1,168 @@
+// lib/main.dart
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/bookmark_provider.dart';
+import 'package:logging/logging.dart';
+
+// Import semua file screen
+import 'screens/beranda_screen.dart';
+import 'screens/rubrik_screen.dart';
+import 'screens/cari_screen.dart';
+import 'screens/bookmark_screen.dart'; // Import bookmark screen
+import 'screens/kirim_tulisan_screen.dart';
+// Network test screen removed
+
+void main() {
+  // Set up logging
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+    if (record.error != null) {
+      // ignore: avoid_print
+      print('Error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      // ignore: avoid_print
+      print('Stack trace: ${record.stackTrace}');
+    }
+  });
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BookmarkProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'BacaPetra',
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primarySwatch: Colors.blue,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              elevation: 1,
+            ),
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.blue,
+            ).copyWith(secondary: Colors.amber.shade800),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primarySwatch: Colors.blue,
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.grey[900],
+              elevation: 1,
+            ),
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.blue,
+              brightness: Brightness.dark,
+            ).copyWith(secondary: Colors.amber.shade700),
+          ),
+          themeMode: themeProvider.themeMode,
+          debugShowCheckedModeBanner: false,
+          home: const MainScreen(),
+        );
+      },
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  // Tambahkan BookmarkScreen ke daftar widget
+  static const List<Widget> _widgetOptions = <Widget>[
+    BerandaScreen(),
+    RubrikScreen(),
+    CariScreen(),
+    BookmarkScreen(),
+    KirimTulisanScreen(),
+    // NetworkTestScreen() removed
+  ];
+
+  // Tambahkan judul untuk halaman bookmark
+  static const List<String> _titleOptions = <String>[
+    'Beranda',
+    'Rubrik',
+    'Cari Tulisan',
+    'Tersimpan',
+    'Kirim Tulisan',
+    // 'Network Test' removed
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_titleOptions[_selectedIndex]),
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      bottomNavigationBar: BottomNavigationBar(
+        // Tambahkan item untuk bookmark
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Rubrik'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmarks),
+            label: 'Tersimpan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.edit_document),
+            label: 'Kirim Tulisan',
+          ),
+          // NetworkTestScreen() item removed
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Theme.of(context).colorScheme.secondary,
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}

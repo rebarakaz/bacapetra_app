@@ -1,0 +1,247 @@
+// lib/services/api_service.dart
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart'; // Import logging package
+
+import '../models/post.dart';
+import '../models/category.dart';
+import '../models/author.dart';
+import '../utils/constants.dart';
+final Logger _logger = Logger('ApiService'); // Create a logger instance
+
+class ApiService {
+  static const String _baseUrl = 'https://www.bacapetra.co/wp-json/wp/v2';
+
+  static Future<List<Post>> fetchPosts({int page = 1, int perPage = 10}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?_embed&page=$page&per_page=$perPage');
+      _logger.info('Fetching posts from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        _logger.info('Successfully fetched ${jsonResponse.length} posts');
+        return jsonResponse.map((post) => Post.fromJson(post)).toList();
+      } else {
+        _logger.severe('Failed to load posts. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load posts. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching posts: $e', e, stackTrace);
+      throw Exception('Failed to load posts: $e');
+    }
+  }
+
+  static Future<List<Post>> fetchPostsByCategory(int categoryId, {int page = 1, int perPage = 10}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?categories=$categoryId&_embed&page=$page&per_page=$perPage');
+      _logger.info('Fetching posts by category from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        _logger.info('Successfully fetched ${jsonResponse.length} posts for category $categoryId');
+        return jsonResponse.map((post) => Post.fromJson(post)).toList();
+      } else {
+        _logger.severe('Failed to load posts for category. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load posts for category. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching posts by category: $e', e, stackTrace);
+      throw Exception('Failed to load posts for category: $e');
+    }
+  }
+
+  static Future<List<Post>> fetchSearchResults(String query, {int page = 1, int perPage = 10}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?search=$query&_embed&page=$page&per_page=$perPage');
+      _logger.info('Fetching search results from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        _logger.info('Successfully fetched ${jsonResponse.length} search results');
+        return jsonResponse.map((post) => Post.fromJson(post)).toList();
+      } else {
+        _logger.severe('Failed to load search results. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load search results. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching search results: $e', e, stackTrace);
+      throw Exception('Failed to load search results: $e');
+    }
+  }
+
+  static Future<Post> fetchPageContent(int pageId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/pages/$pageId');
+      _logger.info('Fetching page content from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        _logger.info('Successfully fetched page content for page $pageId');
+        return Post.fromJson(json.decode(response.body));
+      } else {
+        _logger.severe('Failed to load page content. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load page content. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching page content: $e', e, stackTrace);
+      throw Exception('Failed to load page content: $e');
+    }
+  }
+
+  static Future<Post?> fetchPostBySlug(String slug) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?slug=$slug&_embed');
+      _logger.info('Fetching post by slug from: $uri');
+      final response = await http.get(uri);
+      
+      if (response.statusCode == 200) {
+        final List jsonResponse = json.decode(response.body);
+        if (jsonResponse.isNotEmpty) {
+          _logger.info('Successfully fetched post by slug: $slug');
+          return Post.fromJson(jsonResponse.first);
+        } else {
+          _logger.info('No post found for slug: $slug');
+          return null;
+        }
+      } else {
+        _logger.severe('Failed to fetch post by slug. Status: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching post by slug: $e', e, stackTrace);
+    }
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> fetchTagBySlug(String slug) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/tags?slug=$slug');
+      _logger.info('Fetching tag by slug from: $uri');
+      final response = await http.get(uri);
+      
+      if (response.statusCode == 200) {
+        final List jsonResponse = json.decode(response.body);
+        if (jsonResponse.isNotEmpty) {
+          _logger.info('Successfully fetched tag by slug: $slug');
+          return jsonResponse.first as Map<String, dynamic>;
+        } else {
+          _logger.info('No tag found for slug: $slug');
+          return null;
+        }
+      } else {
+        _logger.severe('Failed to fetch tag by slug. Status: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching tag by slug: $e', e, stackTrace);
+    }
+    return null;
+  }
+
+  static Future<List<Category>> fetchCategories() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/categories?per_page=100');
+      _logger.info('Fetching categories from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        final categories = jsonResponse
+            .map((category) => Category.fromJson(category))
+            .where((category) => category.id != 1 && category.count > 0)
+            .toList();
+        _logger.info('Successfully fetched ${categories.length} categories');
+        return categories;
+      } else {
+        _logger.severe('Failed to load categories. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load categories. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching categories: $e', e, stackTrace);
+      throw Exception('Failed to load categories: $e');
+    }
+  }
+
+  static Future<List<Post>> fetchBookmarkedPosts(List<String> ids) async {
+    if (ids.isEmpty) {
+      return [];
+    }
+    try {
+      final includeQuery = ids.map((id) => 'include[]=$id').join('&');
+      final url = '$_baseUrl/posts?$includeQuery&_embed';
+      final uri = Uri.parse(url);
+      
+      _logger.info('Fetching bookmarked posts from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        _logger.info('Successfully fetched ${jsonResponse.length} bookmarked posts');
+        return jsonResponse.map((post) => Post.fromJson(post)).toList();
+      } else {
+        _logger.severe('Failed to load bookmarked posts. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load bookmarked posts. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching bookmarked posts: $e', e, stackTrace);
+      throw Exception('Failed to load bookmarked posts: $e');
+    }
+  }
+
+  static Future<List<Post>> fetchPostsByAuthorTag(int tagId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?_embed&tags=$tagId&per_page=50');
+      _logger.info('Fetching posts by author tag from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        _logger.info('Successfully fetched ${jsonResponse.length} posts for author tag $tagId');
+        return jsonResponse.map((post) => Post.fromJson(post)).toList();
+      } else {
+        _logger.severe('Failed to load author posts. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load author posts. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching posts by author tag: $e', e, stackTrace);
+      throw Exception('Failed to load author posts: $e');
+    }
+  }
+
+  static Future<Author?> fetchAuthorByTagId(int tagId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/tags/$tagId');
+      _logger.info('Fetching author by tag ID from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        _logger.info('Successfully fetched author for tag ID $tagId');
+        return Author.fromJson(json.decode(response.body));
+      } else {
+        _logger.severe('Failed to load author. Status: ${response.statusCode}, Body: ${response.body}');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching author by tag ID: $e', e, stackTrace);
+      return null;
+    }
+  }
+}
