@@ -85,7 +85,20 @@ flutter build ios --release
 
 ## 📱 Screenshots
 
-*(Add screenshots of your app here)*
+### Home Screen - Article Feed
+<img src="assets/images/beranda.jpg" alt="Home Screen" width="300">
+
+### Categories - Browse by Topics
+<img src="assets/images/rubrik.jpg" alt="Categories Screen" width="300">
+
+### Search - Find Articles
+<img src="assets/images/cari.jpg" alt="Search Screen" width="300">
+
+### Bookmarks - Saved Articles
+<img src="assets/images/bookmark.jpg" alt="Bookmarks Screen" width="300">
+
+### Submit Article - Contribute Content
+<img src="assets/images/kirim_tulisan.jpg" alt="Submit Article Screen" width="300">
 
 ## 🛠️ Technologies Used
 
