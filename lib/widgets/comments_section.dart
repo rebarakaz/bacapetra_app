@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import '../models/comment.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';
@@ -266,9 +267,19 @@ class CommentTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Comment Content
-                Text(
-                  unescape.convert(comment.content),
-                  style: const TextStyle(fontSize: 14, height: 1.4),
+                Html(
+                  data: unescape.convert(comment.content),
+                  style: {
+                    "body": Style(
+                      fontSize: FontSize.medium,
+                      lineHeight: LineHeight.number(1.4),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    "p": Style(
+                      margin: Margins.only(bottom: 8.0),
+                    ),
+                  },
                 ),
               ],
             ),
