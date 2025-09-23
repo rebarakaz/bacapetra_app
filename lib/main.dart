@@ -181,7 +181,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Platform Literasi Digital',
+                    'Menjadi Baik dengan Membaca',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -214,7 +214,7 @@ class _MainScreenState extends State<MainScreen> {
                   context: context,
                   applicationName: 'BacaPetra',
                   applicationVersion: '1.1.0-beta.1',
-                  applicationLegalese: '© 2025 BacaPetra',
+                  applicationLegalese: '© 2025 Yayasan Klub Buku Petra',
                   children: [
                     const SizedBox(height: 16),
                     const Text(
@@ -222,7 +222,12 @@ class _MainScreenState extends State<MainScreen> {
                       'This is a beta release that may contain bugs and '
                       'unfinished features. Please report any issues you encounter.\n\n'
                       'Platform literasi digital untuk komunitas sastra Indonesia. '
-                      'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.',
+                      'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.\n\n'
+                      'Dioperasikan oleh Yayasan Klub Buku Petra, '
+                      'organisasi nirlaba yang telah berkontribusi untuk komunitas literasi '
+                      'Indonesia selama hampir 5 tahun.\n\n'
+                      'Developed by Chrisnov IT Solutions',
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 );

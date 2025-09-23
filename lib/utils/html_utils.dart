@@ -13,28 +13,28 @@ String calculateReadingTime(String htmlContent, {int wordsPerMinute = 200}) {
     final words = plainText.split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
     final wordCount = words.length;
 
-    if (wordCount == 0) return '1 min read';
+    if (wordCount == 0) return '1 min baca';
 
     // Calculate reading time in minutes
     final readingTimeMinutes = (wordCount / wordsPerMinute).ceil();
 
-    // Return formatted string
+    // Return formatted string in Bahasa Indonesia
     if (readingTimeMinutes == 1) {
-      return '1 min read';
+      return '1 min baca';
     } else if (readingTimeMinutes < 60) {
-      return '$readingTimeMinutes min read';
+      return '$readingTimeMinutes min baca';
     } else {
       // For very long articles, show in hours
       final hours = readingTimeMinutes ~/ 60;
       final remainingMinutes = readingTimeMinutes % 60;
       if (remainingMinutes == 0) {
-        return '$hours hour${hours > 1 ? 's' : ''} read';
+        return '$hours jam baca';
       } else {
-        return '$hours hour${hours > 1 ? 's' : ''} ${remainingMinutes} min read';
+        return '$hours jam $remainingMinutes min baca';
       }
     }
   } catch (e) {
     // Fallback for any parsing errors
-    return '3 min read';
+    return '3 min baca';
   }
 }
