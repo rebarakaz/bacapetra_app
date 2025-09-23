@@ -22,4 +22,12 @@ class AppConstants {
 
   // Theme keys
   static const String themeModeKey = 'theme_mode';
+
+  // Feature Flags (for future development planning)
+  static const bool enablePushNotifications = false;
+  static const bool enableOfflineReading = false;
+  static const bool enableSocialFeatures = false;
+  static const bool enableReadingTracker = false;
+  static const bool enableAdvancedSearch = true; // Already implemented
+  static const bool enableCommentPosting = false; // Temporarily disabled
 }
