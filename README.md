@@ -1,5 +1,9 @@
 # BacaPetra 📱
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-rebarakaz/bacapetra_app-blue?style=flat&logo=github)](https://github.com/rebarakaz/bacapetra_app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?style=flat&logo=flutter)](https://flutter.dev)
+
 A modern Flutter application for reading articles from BacaPetra (bacapetra.co), featuring a clean Material Design interface with dark/light theme support.
 
 ## ✨ Features
@@ -47,7 +51,7 @@ lib/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/rebarakaz/bacapetra_app.git
    cd bacapetra_app
    ```
 
@@ -60,6 +64,12 @@ lib/
    ```bash
    flutter run
    ```
+
+## 📥 Download
+
+[![Download APK](https://img.shields.io/badge/Download-APK-blue?style=for-the-badge&logo=android)](https://github.com/rebarakaz/bacapetra_app/releases/latest/download/app-release.apk)
+
+**Latest Release:** [v1.0.0](https://github.com/rebarakaz/bacapetra_app/releases/tag/v1.0.0)
 
 ### Build for Production
 
