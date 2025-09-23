@@ -7,6 +7,7 @@ import 'package:logging/logging.dart'; // Import logging package
 import '../models/post.dart';
 import '../models/category.dart';
 import '../models/author.dart';
+import '../models/comment.dart';
 import '../utils/constants.dart';
 final Logger _logger = Logger('ApiService'); // Create a logger instance
 
@@ -231,7 +232,7 @@ class ApiService {
       final response = await http.get(uri);
 
       _logger.info('Response status: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         _logger.info('Successfully fetched author for tag ID $tagId');
         return Author.fromJson(json.decode(response.body));
@@ -242,6 +243,97 @@ class ApiService {
     } catch (e, stackTrace) {
       _logger.severe('Exception while fetching author by tag ID: $e', e, stackTrace);
       return null;
+    }
+  }
+
+  static Future<List<Comment>> fetchComments(int postId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/comments?post=$postId&per_page=50');
+      _logger.info('Fetching comments for post $postId from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        final comments = jsonResponse.map((comment) => Comment.fromJson(comment)).toList();
+
+        // Organize comments into threads (parent-child relationships)
+        final topLevelComments = <Comment>[];
+        final commentMap = <int, Comment>{};
+
+        // First pass: create all comments
+        for (final comment in comments) {
+          commentMap[comment.id] = comment;
+        }
+
+        // Second pass: organize into hierarchy
+        for (final comment in comments) {
+          if (comment.parent == 0) {
+            // Top-level comment
+            topLevelComments.add(comment);
+          } else {
+            // Reply - add to parent's replies
+            final parent = commentMap[comment.parent];
+            if (parent != null) {
+              final updatedParent = parent.copyWith(
+                replies: [...parent.replies, comment],
+              );
+              commentMap[comment.parent] = updatedParent;
+            }
+          }
+        }
+
+        _logger.info('Successfully fetched ${topLevelComments.length} top-level comments for post $postId');
+        return topLevelComments;
+      } else {
+        _logger.severe('Failed to load comments. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load comments. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching comments: $e', e, stackTrace);
+      throw Exception('Failed to load comments: $e');
+    }
+  }
+
+  static Future<Comment> postComment({
+    required int postId,
+    required String authorName,
+    required String authorEmail,
+    required String content,
+    int parent = 0,
+  }) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/comments');
+      _logger.info('Posting comment to post $postId');
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'post': postId,
+          'author_name': authorName,
+          'author_email': authorEmail,
+          'content': content,
+          'parent': parent,
+        }),
+      );
+
+      _logger.info('Response status: ${response.statusCode}');
+
+      if (response.statusCode == 201) {
+        final jsonResponse = json.decode(response.body);
+        _logger.info('Successfully posted comment');
+        return Comment.fromJson(jsonResponse);
+      } else {
+        _logger.severe('Failed to post comment. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to post comment. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while posting comment: $e', e, stackTrace);
+      throw Exception('Failed to post comment: $e');
     }
   }
 }

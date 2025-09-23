@@ -10,6 +10,7 @@ import 'webview_screen.dart';
 import 'author_screen.dart';
 import '../services/api_service.dart'; // Import ApiService
 import '../utils/html_utils.dart';
+import '../widgets/comments_section.dart';
 
 class DetailArtikelScreen extends StatelessWidget {
   final Post post;
@@ -137,63 +138,74 @@ class DetailArtikelScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (post.imageUrl != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Hero(
-                    tag: 'post-image-${post.id}',
-                    child: Image.network(
-                      post.imageUrl!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 50);
-                      },
+            // Article Content
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (post.imageUrl != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Hero(
+                          tag: 'post-image-${post.id}',
+                          child: Image.network(
+                            post.imageUrl!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.broken_image, size: 50);
+                            },
+                          ),
+                        ),
+                      ),
                     ),
+                  Text(
+                    unescape.convert(post.title),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Html(
+                    data: unescape.convert(post.content),
+                    style: {
+                      "body": Style(
+                        fontSize: FontSize.large,
+                        lineHeight: LineHeight.number(1.5),
+                      ),
+                      "p": Style(
+                        margin: Margins.only(bottom: 16.0),
+                      ),
+                      "hr": Style(
+                        margin: Margins.symmetric(vertical: 24.0),
+                        border: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
+                      ),
+                      "a": Style(
+                        color: Colors.blue.shade800,
+                        textDecoration: TextDecoration.none,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    },
+                    onLinkTap: (String? url, Map<String, String> attributes, element) {
+                      _handleLinkTap(context, url);
+                    },
+                  ),
+                ],
               ),
-            Text(
-              unescape.convert(post.title),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
             ),
-            const SizedBox(height: 16),
-            Html(
-              data: unescape.convert(post.content),
-              style: {
-                "body": Style(
-                  fontSize: FontSize.large,
-                  lineHeight: LineHeight.number(1.5),
-                ),
-                "p": Style(
-                  margin: Margins.only(bottom: 16.0),
-                ),
-                "hr": Style(
-                  margin: Margins.symmetric(vertical: 24.0),
-                  border: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-                ),
-                "a": Style(
-                  color: Colors.blue.shade800,
-                  textDecoration: TextDecoration.none,
-                  fontWeight: FontWeight.w500,
-                ),
-              },
-              onLinkTap: (String? url, Map<String, String> attributes, element) {
-                _handleLinkTap(context, url);
-              },
-            ),
+
+            // Comments Section
+            CommentsSection(post: post),
           ],
         ),
       ),
