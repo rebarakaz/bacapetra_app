@@ -67,8 +67,22 @@ class _CommentsSectionState extends State<CommentsSection> {
         const SnackBar(content: Text('Komentar berhasil dikirim')),
       );
     } catch (e) {
+      String errorMessage = 'Gagal mengirim komentar';
+
+      // Handle specific error cases
+      if (e.toString().contains('401')) {
+        errorMessage = 'Komentar memerlukan autentikasi. Silakan login ke website bacapetra.co terlebih dahulu.';
+      } else if (e.toString().contains('403')) {
+        errorMessage = 'Komentar dinonaktifkan untuk artikel ini.';
+      } else if (e.toString().contains('500')) {
+        errorMessage = 'Server mengalami kesalahan. Coba lagi nanti.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengirim komentar: $e')),
+        SnackBar(
+          content: Text(errorMessage),
+          duration: const Duration(seconds: 5),
+        ),
       );
     } finally {
       setState(() {
@@ -105,6 +119,14 @@ class _CommentsSectionState extends State<CommentsSection> {
                   'Tinggalkan Komentar',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Untuk berkomentar, silakan kunjungi artikel di website bacapetra.co dan login terlebih dahulu.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.orange[700],
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
                 const SizedBox(height: 16),
