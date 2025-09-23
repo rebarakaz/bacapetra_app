@@ -34,7 +34,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
       errorMessage = '';
     });
     try {
-      futurePosts = ApiService.fetchPosts();
+      futurePosts = ApiService.fetchDiversePosts(postsPerCategory: 2);
     } catch (e, stackTrace) {
       _logger.severe('Error loading posts: $e', e, stackTrace);
       setState(() {

@@ -336,4 +336,71 @@ class ApiService {
       throw Exception('Failed to post comment: $e');
     }
   }
+
+  static Future<List<Post>> fetchDiversePosts({int postsPerCategory = 2}) async {
+    try {
+      _logger.info('Fetching diverse posts from multiple categories');
+
+      // First, get all categories
+      final categories = await fetchCategories();
+
+      // Filter out categories with no posts and take top categories by post count
+      final activeCategories = categories
+          .where((category) => category.count > 0)
+          .take(6) // Limit to top 6 categories to avoid too many API calls
+          .toList();
+
+      final List<Post> allPosts = [];
+
+      // Fetch recent posts first (as fallback/primary content)
+      try {
+        final recentPosts = await fetchPosts(perPage: 4);
+        allPosts.addAll(recentPosts);
+      } catch (e) {
+        _logger.warning('Failed to fetch recent posts: $e');
+      }
+
+      // Fetch posts from each active category
+      for (final category in activeCategories) {
+        try {
+          final categoryPosts = await fetchPostsByCategory(
+            category.id,
+            perPage: postsPerCategory,
+          );
+
+          // Add category posts that aren't already in the list
+          for (final post in categoryPosts) {
+            if (!allPosts.any((existingPost) => existingPost.id == post.id)) {
+              allPosts.add(post);
+            }
+          }
+        } catch (e) {
+          _logger.warning('Failed to fetch posts for category ${category.name}: $e');
+          // Continue with other categories
+        }
+      }
+
+      // Remove duplicates and sort by date (newest first)
+      final uniquePosts = <Post>[];
+      final seenIds = <int>{};
+
+      for (final post in allPosts) {
+        if (!seenIds.contains(post.id)) {
+          seenIds.add(post.id);
+          uniquePosts.add(post);
+        }
+      }
+
+      // Sort by date (newest first)
+      uniquePosts.sort((a, b) => b.id.compareTo(a.id)); // Assuming higher ID = newer post
+
+      _logger.info('Successfully fetched ${uniquePosts.length} diverse posts from ${activeCategories.length} categories');
+      return uniquePosts;
+
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching diverse posts: $e', e, stackTrace);
+      // Fallback to regular posts if diverse fetching fails
+      return fetchPosts();
+    }
+  }
 }
