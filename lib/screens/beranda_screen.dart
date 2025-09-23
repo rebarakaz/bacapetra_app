@@ -165,6 +165,24 @@ class _BerandaScreenState extends State<BerandaScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 16,
+                                    color: Theme.of(context).colorScheme.secondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    calculateReadingTime(post.content),
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
