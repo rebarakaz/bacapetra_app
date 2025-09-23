@@ -12,11 +12,19 @@ import '../services/api_service.dart'; // Import ApiService
 import '../utils/html_utils.dart';
 import '../widgets/comments_section.dart';
 
-class DetailArtikelScreen extends StatelessWidget {
+class DetailArtikelScreen extends StatefulWidget {
   final Post post;
-  final Logger _logger = Logger('DetailArtikelScreen');
 
-  DetailArtikelScreen({super.key, required this.post});
+  const DetailArtikelScreen({super.key, required this.post});
+
+  @override
+  State<DetailArtikelScreen> createState() => _DetailArtikelScreenState();
+}
+
+class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
+  final Logger _logger = Logger('DetailArtikelScreen');
+  final ScrollController _scrollController = ScrollController();
+  double _readingProgress = 0.0;
 
   // _fetchPostBySlug() and _fetchTagBySlug() functions have been moved to ApiService
 
@@ -107,21 +115,62 @@ class DetailArtikelScreen extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_updateReadingProgress);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_updateReadingProgress);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _updateReadingProgress() {
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.position.pixels;
+      final progress = maxScroll > 0 ? (currentScroll / maxScroll).clamp(0.0, 1.0) : 0.0;
+
+      setState(() {
+        _readingProgress = progress;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(unescape.convert(post.title)),
+        title: Text(unescape.convert(widget.post.title)),
         actions: [
+          // Reading Progress Indicator
+          Container(
+            width: 60,
+            height: 24,
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: LinearProgressIndicator(
+                value: _readingProgress,
+                backgroundColor: Colors.white.withOpacity(0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  _readingProgress > 0.8 ? Colors.green.shade400 : Colors.blue.shade400,
+                ),
+              ),
+            ),
+          ),
           Consumer<BookmarkProvider>(
             builder: (context, bookmarkProvider, child) {
-              final isBookmarked = bookmarkProvider.isBookmarked(post.id);
+              final isBookmarked = bookmarkProvider.isBookmarked(widget.post.id);
               return IconButton(
                 icon: Icon(
                   isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                   color: isBookmarked ? Colors.amber.shade700 : null,
                 ),
                 onPressed: () {
-                  bookmarkProvider.toggleBookmark(post.id);
+                  bookmarkProvider.toggleBookmark(widget.post.id);
                 },
               );
             },
@@ -130,14 +179,15 @@ class DetailArtikelScreen extends StatelessWidget {
             icon: const Icon(Icons.share),
             onPressed: () {
               Share.share(
-                'Baca tulisan menarik "${unescape.convert(post.title)}" di ${post.link}',
-                subject: unescape.convert(post.title),
+                'Baca tulisan menarik "${unescape.convert(widget.post.title)}" di ${widget.post.link}',
+                subject: unescape.convert(widget.post.title),
               );
             },
           ),
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -147,15 +197,15 @@ class DetailArtikelScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (post.imageUrl != null)
+                  if (widget.post.imageUrl != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12.0),
                         child: Hero(
-                          tag: 'post-image-${post.id}',
+                          tag: 'post-image-${widget.post.id}',
                           child: Image.network(
-                            post.imageUrl!,
+                            widget.post.imageUrl!,
                             width: double.infinity,
                             fit: BoxFit.cover,
                             loadingBuilder: (context, child, loadingProgress) {
@@ -170,14 +220,14 @@ class DetailArtikelScreen extends StatelessWidget {
                       ),
                     ),
                   Text(
-                    unescape.convert(post.title),
+                    unescape.convert(widget.post.title),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(height: 16),
                   Html(
-                    data: unescape.convert(post.content),
+                    data: unescape.convert(widget.post.content),
                     style: {
                       "body": Style(
                         fontSize: FontSize.large,
@@ -205,7 +255,7 @@ class DetailArtikelScreen extends StatelessWidget {
             ),
 
             // Comments Section
-            CommentsSection(post: post),
+            CommentsSection(post: widget.post),
           ],
         ),
       ),
