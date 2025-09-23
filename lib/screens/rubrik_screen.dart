@@ -61,6 +61,10 @@ class _RubrikScreenState extends State<RubrikScreen> {
             ),
           );
         } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          // Sort categories by post count (descending - most posts first)
+          final sortedCategories = List<Category>.from(snapshot.data!)
+            ..sort((a, b) => b.count.compareTo(a.count));
+
           return RefreshIndicator(
             onRefresh: _refreshCategories,
             child: GridView.builder(
@@ -71,9 +75,9 @@ class _RubrikScreenState extends State<RubrikScreen> {
                 mainAxisSpacing: 16.0,
                 childAspectRatio: 1.2, // Adjust aspect ratio for better look
               ),
-              itemCount: snapshot.data!.length,
+              itemCount: sortedCategories.length,
               itemBuilder: (context, index) {
-                Category category = snapshot.data![index];
+                Category category = sortedCategories[index];
                 return InkWell(
                   onTap: () {
                     Navigator.push(
