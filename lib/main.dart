@@ -12,6 +12,7 @@ import 'screens/rubrik_screen.dart';
 import 'screens/cari_screen.dart';
 import 'screens/bookmark_screen.dart'; // Import bookmark screen
 import 'screens/kirim_tulisan_screen.dart';
+import 'screens/offline_screen.dart'; // Import offline screen
 // Network test screen removed
 
 void main() {
@@ -140,6 +141,75 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'BacaPetra',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Platform Literasi Digital',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.offline_pin),
+              title: const Text('Artikel Offline'),
+              subtitle: const Text('Baca tanpa internet'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OfflineScreen(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('Tentang Aplikasi'),
+              onTap: () {
+                Navigator.pop(context);
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'BacaPetra',
+                  applicationVersion: '1.0.0',
+                  applicationLegalese: '© 2025 BacaPetra',
+                  children: [
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Platform literasi digital untuk komunitas sastra Indonesia. '
+                      'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.',
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
