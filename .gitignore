@@ -33,6 +33,12 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Flutter project metadata
+.metadata
+
+# Lockfile (should not be committed for public repos)
+pubspec.lock
+
 # Symbolication related
 app.*.symbols
 
