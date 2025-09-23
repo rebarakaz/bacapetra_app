@@ -57,6 +57,12 @@
 - **Advanced search filters** in development
 - **Social features** expansion planned
 
+### Development Notes:
+- **Linting warnings**: Some VS Code analysis warnings for sqflite imports may appear
+  - These are analysis server issues, not runtime problems
+  - The app builds and runs correctly despite the warnings
+  - Restart VS Code analysis server if needed: `Ctrl+Shift+P` → `Dart: Restart Analysis Server`
+
 ### Performance Notes:
 - First app launch may be slower due to database initialization
 - Large articles may take time to download for offline reading
