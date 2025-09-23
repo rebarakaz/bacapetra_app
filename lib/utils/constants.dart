@@ -27,7 +27,8 @@ class AppConstants {
   static const bool enablePushNotifications = false;
   static const bool enableOfflineReading = false;
   static const bool enableSocialFeatures = true; // Sharing already implemented
-  static const bool enableReadingTracker = false;
+  static const bool enableReadingTracker = true; // Reading progress implemented
   static const bool enableAdvancedSearch = true; // Already implemented
   static const bool enableCommentPosting = false; // Temporarily disabled
+  static const bool enablePullToRefresh = true; // Already implemented across all screens
 }
