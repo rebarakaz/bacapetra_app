@@ -26,7 +26,7 @@ class AppConstants {
   // Feature Flags (for future development planning)
   static const bool enablePushNotifications = false;
   static const bool enableOfflineReading = false;
-  static const bool enableSocialFeatures = false;
+  static const bool enableSocialFeatures = true; // Sharing already implemented
   static const bool enableReadingTracker = false;
   static const bool enableAdvancedSearch = true; // Already implemented
   static const bool enableCommentPosting = false; // Temporarily disabled
