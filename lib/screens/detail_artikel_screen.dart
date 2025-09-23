@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'webview_screen.dart';
 import 'author_screen.dart';
 import '../services/api_service.dart'; // Import ApiService
+import '../services/database_helper.dart';
 import '../utils/html_utils.dart';
 import '../widgets/comments_section.dart';
 
@@ -25,6 +26,12 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   final Logger _logger = Logger('DetailArtikelScreen');
   final ScrollController _scrollController = ScrollController();
   double _readingProgress = 0.0;
+  bool _isSavedOffline = false;
+  bool _isSavingOffline = false;
+
+  // Performance optimization: throttle progress updates
+  DateTime _lastProgressUpdate = DateTime.now();
+  static const Duration _progressUpdateThrottle = Duration(milliseconds: 100);
 
   // _fetchPostBySlug() and _fetchTagBySlug() functions have been moved to ApiService
 
@@ -118,6 +125,7 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_updateReadingProgress);
+    _checkOfflineStatus();
   }
 
   @override
@@ -128,14 +136,82 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   }
 
   void _updateReadingProgress() {
+    // Throttle progress updates to improve performance
+    final now = DateTime.now();
+    if (now.difference(_lastProgressUpdate) < _progressUpdateThrottle) {
+      return;
+    }
+    _lastProgressUpdate = now;
+
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
       final progress = maxScroll > 0 ? (currentScroll / maxScroll).clamp(0.0, 1.0) : 0.0;
 
-      setState(() {
-        _readingProgress = progress;
-      });
+      // Only update if progress has changed significantly (avoid unnecessary rebuilds)
+      if ((progress - _readingProgress).abs() > 0.01) {
+        setState(() {
+          _readingProgress = progress;
+        });
+      }
+    }
+  }
+
+  Future<void> _checkOfflineStatus() async {
+    try {
+      final isSaved = await DatabaseHelper.instance.isPostSavedOffline(widget.post.id);
+      if (mounted) {
+        setState(() {
+          _isSavedOffline = isSaved;
+        });
+      }
+    } catch (e) {
+      _logger.warning('Failed to check offline status: $e');
+    }
+  }
+
+  Future<void> _toggleOfflineSave() async {
+    if (_isSavingOffline) return;
+
+    setState(() {
+      _isSavingOffline = true;
+    });
+
+    try {
+      if (_isSavedOffline) {
+        // Remove from offline storage
+        await DatabaseHelper.instance.removeOfflinePost(widget.post.id);
+        if (mounted) {
+          setState(() {
+            _isSavedOffline = false;
+          });
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Artikel dihapus dari penyimpanan offline')),
+        );
+      } else {
+        // Save for offline reading
+        await DatabaseHelper.instance.savePostForOffline(widget.post);
+        if (mounted) {
+          setState(() {
+            _isSavedOffline = true;
+          });
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Artikel disimpan untuk dibaca offline')),
+        );
+      }
+    } catch (e) {
+      _logger.severe('Failed to toggle offline save: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menyimpan artikel: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingOffline = false;
+        });
+      }
     }
   }
 
@@ -174,6 +250,20 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                 },
               );
             },
+          ),
+          IconButton(
+            icon: _isSavingOffline
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(
+                    _isSavedOffline ? Icons.offline_pin : Icons.download,
+                    color: _isSavedOffline ? Colors.green.shade600 : null,
+                  ),
+            onPressed: _toggleOfflineSave,
+            tooltip: _isSavedOffline ? 'Hapus dari offline' : 'Simpan untuk offline',
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -225,7 +315,25 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        calculateReadingTime(widget.post.content),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Html(
                     data: unescape.convert(widget.post.content),
                     style: {
@@ -249,6 +357,8 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                     onLinkTap: (String? url, Map<String, String> attributes, element) {
                       _handleLinkTap(context, url);
                     },
+                    // Performance optimization
+                    shrinkWrap: true,
                   ),
                 ],
               ),
