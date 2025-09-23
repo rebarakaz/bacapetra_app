@@ -71,11 +71,17 @@ class _DaftarArtikelRubrikScreenState extends State<DaftarArtikelRubrikScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
+        _hasMore = false; // Stop trying to load more if there's an error
       });
-      // Optionally, show a snackbar or a toast message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat tulisan: $e')),
-      );
+
+      // Only show error for actual network/server errors, not for empty categories
+      final errorString = e.toString();
+      if (!errorString.contains('Status: 400') && !errorString.contains('empty')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat tulisan: $e')),
+        );
+      }
+      // For 400 errors (empty categories), just silently stop loading
     }
   }
 
