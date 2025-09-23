@@ -174,9 +174,8 @@ class DatabaseHelper {
   // Get storage statistics
   Future<Map<String, dynamic>> getStorageStats() async {
     final db = await database;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM $tableOfflinePosts'),
-    ) ?? 0;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableOfflinePosts');
+    final count = result.isNotEmpty ? (result.first['count'] as int?) ?? 0 : 0;
 
     // Estimate size (rough calculation)
     final posts = await getOfflinePosts();
