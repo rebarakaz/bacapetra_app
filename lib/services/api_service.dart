@@ -347,36 +347,51 @@ class ApiService {
       // Filter out categories with no posts and take top categories by post count
       final activeCategories = categories
           .where((category) => category.count > 0)
-          .take(6) // Limit to top 6 categories to avoid too many API calls
+          .take(4) // Reduced from 6 to 4 for better performance
           .toList();
+
+      // Prepare all API calls to run in parallel
+      final List<Future<List<Post>>> apiCalls = [];
+
+      // Add recent posts call
+      apiCalls.add(fetchPosts(perPage: 4));
+
+      // Add category posts calls
+      for (final category in activeCategories) {
+        apiCalls.add(fetchPostsByCategory(category.id, perPage: postsPerCategory));
+      }
+
+      // Execute all API calls in parallel
+      _logger.info('Making ${apiCalls.length} parallel API calls');
+      final results = await Future.wait(apiCalls, eagerError: false);
 
       final List<Post> allPosts = [];
 
-      // Fetch recent posts first (as fallback/primary content)
-      try {
-        final recentPosts = await fetchPosts(perPage: 4);
-        allPosts.addAll(recentPosts);
-      } catch (e) {
-        _logger.warning('Failed to fetch recent posts: $e');
-      }
-
-      // Fetch posts from each active category
-      for (final category in activeCategories) {
+      // Process results
+      for (int i = 0; i < results.length; i++) {
         try {
-          final categoryPosts = await fetchPostsByCategory(
-            category.id,
-            perPage: postsPerCategory,
-          );
+          if (i == 0) {
+            // First result is recent posts
+            allPosts.addAll(results[i]);
+            _logger.info('Added ${results[i].length} recent posts');
+          } else {
+            // Other results are category posts
+            final categoryPosts = results[i];
+            final categoryName = activeCategories[i - 1].name;
 
-          // Add category posts that aren't already in the list
-          for (final post in categoryPosts) {
-            if (!allPosts.any((existingPost) => existingPost.id == post.id)) {
-              allPosts.add(post);
+            // Add category posts that aren't already in the list
+            int addedCount = 0;
+            for (final post in categoryPosts) {
+              if (!allPosts.any((existingPost) => existingPost.id == post.id)) {
+                allPosts.add(post);
+                addedCount++;
+              }
             }
+            _logger.info('Added $addedCount posts from category: $categoryName');
           }
         } catch (e) {
-          _logger.warning('Failed to fetch posts for category ${category.name}: $e');
-          // Continue with other categories
+          _logger.warning('Failed to process result ${i}: $e');
+          // Continue with other results
         }
       }
 
