@@ -208,7 +208,7 @@ class _MainScreenState extends State<MainScreen> {
                       'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.\n\n'
                       'Dioperasikan oleh Yayasan Klub Buku Petra, '
                       'organisasi nirlaba yang telah berkontribusi untuk komunitas literasi '
-                      'Indonesia selama hampir 5 tahun.\n\n'
+                      'Indonesia selama hampir 7 tahun.\n\n'
                       'Developed by Chrisnov IT Solutions',
                       textAlign: TextAlign.center,
                     ),
