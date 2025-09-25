@@ -13,6 +13,9 @@ A modern Flutter application for reading articles from BacaPetra (bacapetra.co),
 - 👤 **Authors**: Discover articles by specific authors
 - 🔍 **Search**: Find articles with powerful search functionality
 - 🔖 **Bookmarks**: Save favorite articles for later reading
+- 💬 **Comments**: View and interact with article comments
+- 📱 **Offline Reading**: Save articles for offline access
+- 🔤 **Font Scaling**: Adjustable font size for better readability (70%-150%)
 - 🌙 **Theme Support**: Light, dark, and system theme modes
 - 🌐 **WebView Integration**: Open external links seamlessly
 - 📱 **Responsive Design**: Optimized for mobile devices
@@ -108,8 +111,10 @@ flutter build ios --release
 - **HTTP**: Network requests
 - **HTML Unescape**: HTML content processing
 - **Shared Preferences**: Local data persistence
+- **SQLite**: Offline data storage
 - **URL Launcher**: External link handling
 - **Share Plus**: Social sharing functionality
+- **WebView Flutter**: In-app web content display
 
 ## 🔧 Configuration
 
@@ -127,10 +132,12 @@ lib/
 ├── models/
 │   ├── post.dart               # Post model
 │   ├── category.dart           # Category model
-│   └── author.dart             # Author model
+│   ├── author.dart             # Author model
+│   └── comment.dart            # Comment model
 ├── providers/
 │   ├── theme_provider.dart     # Theme management
-│   └── bookmark_provider.dart  # Bookmark management
+│   ├── bookmark_provider.dart  # Bookmark management
+│   └── font_size_provider.dart # Font size scaling
 ├── screens/
 │   ├── beranda_screen.dart     # Home screen
 │   ├── detail_artikel_screen.dart # Article detail
@@ -138,9 +145,11 @@ lib/
 │   ├── author_screen.dart      # Author articles
 │   ├── cari_screen.dart        # Search screen
 │   ├── bookmark_screen.dart    # Bookmarks screen
-│   └── kirim_tulisan_screen.dart # Submit article
+│   ├── kirim_tulisan_screen.dart # Submit article
+│   └── offline_screen.dart     # Offline reading
 ├── services/
-│   └── api_service.dart        # API service layer
+│   ├── api_service.dart        # API service layer
+│   └── database_helper.dart    # SQLite database management
 ├── utils/
 │   ├── constants.dart          # App constants
 │   ├── html_utils.dart         # HTML utilities
@@ -148,7 +157,8 @@ lib/
 └── widgets/
     ├── post_card.dart          # Article card widget
     ├── loading_widget.dart     # Loading indicator
-    └── error_widget.dart       # Error display widget
+    ├── error_widget.dart       # Error display widget
+    └── comments_section.dart   # Comments display widget
 ```
 
 ## 🤝 Contributing
