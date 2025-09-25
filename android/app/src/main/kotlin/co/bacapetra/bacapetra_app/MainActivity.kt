@@ -1,4 +1,4 @@
-package com.example.bacapetra_wp
+package co.bacapetra.bacapetra_app
 
 import io.flutter.embedding.android.FlutterActivity
 

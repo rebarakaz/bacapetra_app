@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/comment.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';
 import '../utils/html_utils.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/error_widget.dart';
+import '../screens/webview_screen.dart';
 
 class CommentsSection extends StatefulWidget {
   final Post post;
@@ -80,28 +82,44 @@ class _CommentsSectionState extends State<CommentsSection> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.web, color: Colors.blue[700], size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Buka di Browser',
-                          style: TextStyle(
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
+                GestureDetector(
+                  onTap: () {
+                    final url = widget.post.link;
+                    if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebviewScreen(
+                            url: url,
+                            title: 'Komentar',
                           ),
                         ),
-                      ),
-                      Icon(Icons.arrow_forward, color: Colors.blue[700], size: 16),
-                    ],
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.web, color: Colors.blue[700], size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Buka di Browser',
+                            style: TextStyle(
+                              color: Colors.blue[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.arrow_forward, color: Colors.blue[700], size: 16),
+                      ],
+                    ),
                   ),
                 ),
               ],
