@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/src/style/fontsize.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:logging/logging.dart';
 import '../providers/bookmark_provider.dart';
+import '../providers/font_size_provider.dart';
 import '../models/post.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'webview_screen.dart';
@@ -231,6 +233,27 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
               );
             },
           ),
+          Consumer<FontSizeProvider>(
+            builder: (context, fontSizeProvider, child) {
+              return PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'increase') {
+                    fontSizeProvider.increaseFontSize();
+                  } else if (value == 'decrease') {
+                    fontSizeProvider.decreaseFontSize();
+                  } else if (value == 'reset') {
+                    fontSizeProvider.resetFontSize();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'increase', child: Text('Perbesar Font')),
+                  const PopupMenuItem(value: 'decrease', child: Text('Perkecil Font')),
+                  const PopupMenuItem(value: 'reset', child: Text('Reset Font')),
+                ],
+                icon: const Icon(Icons.format_size),
+              );
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -291,31 +314,35 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Html(
-                    data: unescape.convert(widget.post.content),
-                    style: {
-                      "body": Style(
-                        fontSize: FontSize.large,
-                        lineHeight: LineHeight.number(1.5),
-                      ),
-                      "p": Style(
-                        margin: Margins.only(bottom: 16.0),
-                      ),
-                      "hr": Style(
-                        margin: Margins.symmetric(vertical: 24.0),
-                        border: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-                      ),
-                      "a": Style(
-                        color: Colors.blue.shade800,
-                        textDecoration: TextDecoration.none,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Consumer<FontSizeProvider>(
+                    builder: (context, fontSizeProvider, child) {
+                      return Html(
+                        data: unescape.convert(widget.post.content),
+                        style: {
+                          "body": Style(
+                            fontSize: FontSize(18.0 * fontSizeProvider.fontSizeScale),
+                            lineHeight: LineHeight.number(1.5),
+                          ),
+                          "p": Style(
+                            margin: Margins.only(bottom: 16.0),
+                          ),
+                          "hr": Style(
+                            margin: Margins.symmetric(vertical: 24.0),
+                            border: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
+                          ),
+                          "a": Style(
+                            color: Colors.blue.shade800,
+                            textDecoration: TextDecoration.none,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        },
+                        onLinkTap: (String? url, Map<String, String> attributes, element) {
+                          _handleLinkTap(context, url);
+                        },
+                        // Performance optimization
+                        shrinkWrap: true,
+                      );
                     },
-                    onLinkTap: (String? url, Map<String, String> attributes, element) {
-                      _handleLinkTap(context, url);
-                    },
-                    // Performance optimization
-                    shrinkWrap: true,
                   ),
                 ],
               ),
