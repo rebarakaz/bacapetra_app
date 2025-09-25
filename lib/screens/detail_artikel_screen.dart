@@ -25,13 +25,8 @@ class DetailArtikelScreen extends StatefulWidget {
 class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   final Logger _logger = Logger('DetailArtikelScreen');
   final ScrollController _scrollController = ScrollController();
-  double _readingProgress = 0.0;
   bool _isSavedOffline = false;
   bool _isSavingOffline = false;
-
-  // Performance optimization: throttle progress updates
-  DateTime _lastProgressUpdate = DateTime.now();
-  static const Duration _progressUpdateThrottle = Duration(milliseconds: 100);
 
   // _fetchPostBySlug() and _fetchTagBySlug() functions have been moved to ApiService
 
@@ -124,38 +119,16 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_updateReadingProgress);
     _checkOfflineStatus();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_updateReadingProgress);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _updateReadingProgress() {
-    // Throttle progress updates to improve performance
-    final now = DateTime.now();
-    if (now.difference(_lastProgressUpdate) < _progressUpdateThrottle) {
-      return;
-    }
-    _lastProgressUpdate = now;
 
-    if (_scrollController.hasClients) {
-      final maxScroll = _scrollController.position.maxScrollExtent;
-      final currentScroll = _scrollController.position.pixels;
-      final progress = maxScroll > 0 ? (currentScroll / maxScroll).clamp(0.0, 1.0) : 0.0;
-
-      // Only update if progress has changed significantly (avoid unnecessary rebuilds)
-      if ((progress - _readingProgress).abs() > 0.01) {
-        setState(() {
-          _readingProgress = progress;
-        });
-      }
-    }
-  }
 
   Future<void> _checkOfflineStatus() async {
     try {
@@ -221,22 +194,6 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
       appBar: AppBar(
         title: Text(unescape.convert(widget.post.title)),
         actions: [
-          // Reading Progress Indicator
-          Container(
-            width: 60,
-            height: 24,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: LinearProgressIndicator(
-                value: _readingProgress,
-                backgroundColor: Colors.white.withOpacity(0.3),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  _readingProgress > 0.8 ? Colors.green.shade400 : Colors.blue.shade400,
-                ),
-              ),
-            ),
-          ),
           Consumer<BookmarkProvider>(
             builder: (context, bookmarkProvider, child) {
               final isBookmarked = bookmarkProvider.isBookmarked(widget.post.id);

@@ -21,7 +21,6 @@ class _CommentsSectionState extends State<CommentsSection> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
-  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -33,63 +32,6 @@ class _CommentsSectionState extends State<CommentsSection> {
     _commentsFuture = ApiService.fetchComments(widget.post.id);
   }
 
-  Future<void> _submitComment() async {
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _commentController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mohon lengkapi semua field')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    try {
-      await ApiService.postComment(
-        postId: widget.post.id,
-        authorName: _nameController.text.trim(),
-        authorEmail: _emailController.text.trim(),
-        content: _commentController.text.trim(),
-      );
-
-      // Clear form
-      _commentController.clear();
-
-      // Reload comments
-      setState(() {
-        _loadComments();
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Komentar berhasil dikirim')),
-      );
-    } catch (e) {
-      String errorMessage = 'Gagal mengirim komentar';
-
-      // Handle specific error cases
-      if (e.toString().contains('401')) {
-        errorMessage = 'Komentar memerlukan autentikasi. Silakan login ke website bacapetra.co terlebih dahulu.';
-      } else if (e.toString().contains('403')) {
-        errorMessage = 'Komentar dinonaktifkan untuk artikel ini.';
-      } else if (e.toString().contains('500')) {
-        errorMessage = 'Server mengalami kesalahan. Coba lagi nanti.';
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    } finally {
-      setState(() {
-        _isSubmitting = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

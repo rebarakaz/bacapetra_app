@@ -390,7 +390,7 @@ class ApiService {
             _logger.info('Added $addedCount posts from category: $categoryName');
           }
         } catch (e) {
-          _logger.warning('Failed to process result ${i}: $e');
+          _logger.warning('Failed to process result $i: $e');
           // Continue with other results
         }
       }
