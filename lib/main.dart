@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/bookmark_provider.dart';
+import 'providers/font_size_provider.dart';
 import 'package:logging/logging.dart';
 
 // Import semua file screen
@@ -36,6 +37,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => BookmarkProvider()),
+        ChangeNotifierProvider(create: (_) => FontSizeProvider()),
       ],
       child: const MyApp(),
     ),
@@ -141,23 +143,7 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(32.0),
-          child: Container(
-            width: double.infinity,
-            color: Colors.orange.shade700,
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: const Text(
-              '🚧 BETA VERSION - May contain bugs 🚧',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+
       ),
       drawer: Drawer(
         child: ListView(
@@ -213,14 +199,11 @@ class _MainScreenState extends State<MainScreen> {
                 showAboutDialog(
                   context: context,
                   applicationName: 'BacaPetra',
-                  applicationVersion: '1.1.0-beta.1',
+                  applicationVersion: '1.1.0',
                   applicationLegalese: '© 2025 Yayasan Klub Buku Petra',
                   children: [
                     const SizedBox(height: 16),
                     const Text(
-                      '🚧 BETA VERSION 🚧\n\n'
-                      'This is a beta release that may contain bugs and '
-                      'unfinished features. Please report any issues you encounter.\n\n'
                       'Platform literasi digital untuk komunitas sastra Indonesia. '
                       'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.\n\n'
                       'Dioperasikan oleh Yayasan Klub Buku Petra, '
