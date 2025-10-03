@@ -418,4 +418,70 @@ class ApiService {
       return fetchPosts();
     }
   }
+
+  static Future<int> fetchCommentCount(int postId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/comments?post=$postId&per_page=1');
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        // WordPress returns total count in response headers
+        final total = response.headers['x-wp-total'];
+        final count = int.parse(total ?? '0');
+        _logger.info('Fetched comment count for post $postId: $count');
+        return count;
+      }
+      return 0;
+    } catch (e) {
+      _logger.warning('Failed to fetch comment count for post $postId: $e');
+      return 0;
+    }
+  }
+
+  static Future<List<Post>> fetchPopularPosts({int page = 1, int perPage = 20}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/posts?_embed&page=$page&per_page=$perPage&orderby=date&order=desc');
+      _logger.info('Fetching posts for popularity ranking from: $uri');
+      final response = await http.get(uri);
+
+      _logger.info('Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        final posts = jsonResponse.map((post) => Post.fromJson(post)).toList();
+
+        // Fetch real comment counts for each post
+        _logger.info('Fetching comment counts for ${posts.length} posts...');
+        final commentCountFutures = posts.map((post) => fetchCommentCount(post.id)).toList();
+        final commentCounts = await Future.wait(commentCountFutures);
+
+        // Update posts with real comment counts
+        for (int i = 0; i < posts.length; i++) {
+          posts[i] = Post(
+            id: posts[i].id,
+            title: posts[i].title,
+            excerpt: posts[i].excerpt,
+            content: posts[i].content,
+            imageUrl: posts[i].imageUrl,
+            tags: posts[i].tags,
+            link: posts[i].link,
+            categories: posts[i].categories,
+            commentCount: commentCounts[i],
+          );
+        }
+
+        // Sort by comment count (descending) for popularity
+        posts.sort((a, b) => b.commentCount.compareTo(a.commentCount));
+
+        _logger.info('Successfully fetched ${posts.length} posts with real comment counts and sorted by popularity');
+        return posts;
+      } else {
+        _logger.severe('Failed to load posts for popularity. Status: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to load popular posts. Status: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      _logger.severe('Exception while fetching popular posts: $e', e, stackTrace);
+      throw Exception('Failed to load popular posts: $e');
+    }
+  }
 }

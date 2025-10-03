@@ -9,6 +9,7 @@ class Post {
   final List<dynamic> tags; // Tag IDs for author identification
   final String link;
   final List<String> categories;
+  final int commentCount;
 
   Post({
     required this.id,
@@ -19,6 +20,7 @@ class Post {
     required this.tags,
     required this.link,
     required this.categories,
+    this.commentCount = 0,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class Post {
       tags: json['tags'] ?? [],
       link: json['link'],
       categories: categories,
+      commentCount: json['comment_count'] ?? 0,
     );
   }
 }

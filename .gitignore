@@ -49,3 +49,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Development planning documents
+future_feature_roadmap.md

@@ -29,6 +29,7 @@ class AppConstants {
   static const bool enableSocialFeatures = true; // Sharing already implemented
   static const bool enableReadingTracker = true; // Reading progress implemented
   static const bool enableAdvancedSearch = true; // Already implemented
+  static const bool enablePopularPosts = true; // Popular posts by comment count implemented
   static const bool enableCommentPosting = false; // Temporarily disabled
   static const bool enablePullToRefresh = true; // Already implemented across all screens
 }

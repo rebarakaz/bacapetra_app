@@ -12,6 +12,7 @@ A modern Flutter application for reading articles from BacaPetra (bacapetra.co),
 - 🏷️ **Categories**: Explore articles by categories/rubrics
 - 👤 **Authors**: Discover articles by specific authors
 - 🔍 **Search**: Find articles with powerful search functionality
+- 🔥 **Popular Posts**: Discover trending articles based on community engagement
 - 🔖 **Bookmarks**: Save favorite articles for later reading
 - 💬 **Comments**: View and interact with article comments
 - 📱 **Offline Reading**: Save articles for offline access

@@ -12,6 +12,7 @@ import 'screens/beranda_screen.dart';
 import 'screens/rubrik_screen.dart';
 import 'screens/cari_screen.dart';
 import 'screens/bookmark_screen.dart'; // Import bookmark screen
+import 'screens/popular_screen.dart'; // Import popular screen
 import 'screens/kirim_tulisan_screen.dart';
 import 'screens/offline_screen.dart'; // Import offline screen
 // Network test screen removed
@@ -96,22 +97,22 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // Tambahkan BookmarkScreen ke daftar widget
+  // Tambahkan PopularScreen ke daftar widget (BookmarkScreen dipindah ke drawer)
   static const List<Widget> _widgetOptions = <Widget>[
     BerandaScreen(),
     RubrikScreen(),
     CariScreen(),
-    BookmarkScreen(),
+    PopularScreen(),
     KirimTulisanScreen(),
     // NetworkTestScreen() removed
   ];
 
-  // Tambahkan judul untuk halaman bookmark
+  // Judul untuk halaman (BookmarkScreen dipindah ke drawer)
   static const List<String> _titleOptions = <String>[
     'Beranda',
     'Rubrik',
     'Cari Tulisan',
-    'Tersimpan',
+    'Populer',
     'Kirim Tulisan',
     // 'Network Test' removed
   ];
@@ -190,6 +191,20 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.bookmarks),
+              title: const Text('Tersimpan'),
+              subtitle: const Text('Artikel yang disimpan'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BookmarkScreen(),
+                  ),
+                );
+              },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.info),
@@ -221,20 +236,20 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
-        // Tambahkan item untuk bookmark
+        // Item navigasi (BookmarkScreen dipindah ke drawer)
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Rubrik'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmarks),
-            label: 'Tersimpan',
+            icon: Icon(Icons.trending_up),
+            label: 'Populer',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.edit_document),
             label: 'Kirim Tulisan',
           ),
-          // NetworkTestScreen() item removed
+          // NetworkTestScreen() removed
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).colorScheme.secondary,
