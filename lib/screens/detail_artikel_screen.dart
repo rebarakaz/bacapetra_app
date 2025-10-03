@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/src/style/fontsize.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:logging/logging.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/font_size_provider.dart';
@@ -190,6 +192,94 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
     }
   }
 
+  void _showShareDialog() {
+    final articleTitle = unescape.convert(widget.post.title);
+    final articleUrl = widget.post.link;
+    final shareText = 'Baca tulisan menarik "$articleTitle" di BacaPetra\n\n$articleUrl';
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(
+              'Bagikan Artikel',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Icon(
+                Icons.share,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: const Text('Bagikan'),
+              subtitle: const Text('Kirim ke aplikasi lain'),
+              onTap: () {
+                Navigator.pop(context);
+                Share.share(shareText, subject: articleTitle);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.copy,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: const Text('Salin Link'),
+              subtitle: const Text('Salin link ke clipboard'),
+              onTap: () async {
+                await Clipboard.setData(ClipboardData(text: articleUrl));
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Link berhasil disalin ke clipboard')),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.message,
+                color: Colors.green,
+              ),
+              title: const Text('WhatsApp'),
+              subtitle: const Text('Bagikan via WhatsApp'),
+              onTap: () async {
+                Navigator.pop(context);
+                final whatsappUrl = 'https://wa.me/?text=${Uri.encodeComponent(shareText)}';
+                if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+                  await launchUrl(Uri.parse(whatsappUrl), mode: LaunchMode.externalApplication);
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('WhatsApp tidak terinstall')),
+                    );
+                  }
+                }
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,12 +316,8 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {
-              Share.share(
-                'Baca tulisan menarik "${unescape.convert(widget.post.title)}" di ${widget.post.link}',
-                subject: unescape.convert(widget.post.title),
-              );
-            },
+            onPressed: _showShareDialog,
+            tooltip: 'Bagikan artikel',
           ),
           Consumer<FontSizeProvider>(
             builder: (context, fontSizeProvider, child) {
@@ -350,6 +436,77 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
 
             // Comments Section
             CommentsSection(post: widget.post),
+
+            // Share Section at the end of article
+            Container(
+              margin: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.share,
+                    size: 32,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Menikmati artikel ini?',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Bagikan dengan teman-teman Anda agar mereka juga bisa menikmati tulisan menarik ini.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _showShareDialog,
+                          icon: const Icon(Icons.share),
+                          label: const Text('Bagikan'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            await Clipboard.setData(ClipboardData(text: widget.post.link));
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Link berhasil disalin ke clipboard')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.copy),
+                          label: const Text('Salin Link'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
