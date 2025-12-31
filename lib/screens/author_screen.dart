@@ -61,7 +61,7 @@ class _AuthorScreenState extends State<AuthorScreen> {
                         final author = authorSnapshot.data!;
                         return Container(
                           padding: const EdgeInsets.all(16.0),
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

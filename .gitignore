@@ -49,6 +49,32 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
+/android/app/build/
 
 # Development planning documents
 future_feature_roadmap.md
+
+# Android signing credentials (SECURITY SENSITIVE - NEVER COMMIT!)
+android/key.properties
+*.jks
+*.keystore
+upload-keystore.jks
+
+# Development logs and temporary files
+*.log
+flutter_*.log
+build_log.txt
+
+# Shell scripts (optional - uncomment if you want to exclude)
+# build_beta.sh
+
+# Beta/Development documentation
+BETA_README.md
+
+# IDE-specific files
+.qoderignore
+bacapetra_wp.iml
+
+# DevTools
+devtools_options.yaml

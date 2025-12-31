@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/style/fontsize.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,18 +8,19 @@ import 'package:logging/logging.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/font_size_provider.dart';
 import '../models/post.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'webview_screen.dart';
 import 'author_screen.dart';
 import '../services/api_service.dart'; // Import ApiService
 import '../services/database_helper.dart';
 import '../utils/html_utils.dart';
 import '../widgets/comments_section.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DetailArtikelScreen extends StatefulWidget {
   final Post post;
+  final String? heroTag;
 
-  const DetailArtikelScreen({super.key, required this.post});
+  const DetailArtikelScreen({super.key, required this.post, this.heroTag});
 
   @override
   State<DetailArtikelScreen> createState() => _DetailArtikelScreenState();
@@ -31,6 +31,8 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isSavedOffline = false;
   bool _isSavingOffline = false;
+  final ValueNotifier<double> _scrollProgress = ValueNotifier(0.0);
+  late String _readingTime;
 
   // _fetchPostBySlug() and _fetchTagBySlug() functions have been moved to ApiService
 
@@ -53,9 +55,14 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
 
       // Check if it's a TAG/AUTHOR link
       if (uri.pathSegments.contains('tag')) {
-        final slug = uri.pathSegments.lastWhere((s) => s.isNotEmpty, orElse: () => '');
+        final slug = uri.pathSegments.lastWhere(
+          (s) => s.isNotEmpty,
+          orElse: () => '',
+        );
         if (slug.isNotEmpty) {
-          final tag = await ApiService.fetchTagBySlug(slug); // Call from ApiService
+          final tag = await ApiService.fetchTagBySlug(
+            slug,
+          ); // Call from ApiService
           if (context.mounted) {
             Navigator.pop(context); // Dismiss loading dialog
             if (tag != null && tag['id'] is int && tag['name'] is String) {
@@ -72,10 +79,16 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
             }
           }
         }
-      } else { // If not a tag, assume it's an article link (e.g., "Baca Juga" links)
-        final slug = uri.pathSegments.lastWhere((s) => s.isNotEmpty, orElse: () => '');
+      } else {
+        // If not a tag, assume it's an article link (e.g., "Baca Juga" links)
+        final slug = uri.pathSegments.lastWhere(
+          (s) => s.isNotEmpty,
+          orElse: () => '',
+        );
         if (slug.isNotEmpty) {
-          final newPost = await ApiService.fetchPostBySlug(slug); // Call from ApiService
+          final newPost = await ApiService.fetchPostBySlug(
+            slug,
+          ); // Call from ApiService
           if (context.mounted) {
             Navigator.pop(context); // Dismiss loading dialog
             if (newPost != null) {
@@ -97,7 +110,6 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
         // If we couldn't handle it as a post or tag, open in WebView as a fallback.
         _openInWebView(context, url);
       }
-
     } else {
       // It's an external link
       _openInWebView(context, url);
@@ -124,19 +136,33 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   void initState() {
     super.initState();
     _checkOfflineStatus();
+    _readingTime = calculateReadingTime(widget.post.content);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.position.pixels;
+      if (maxScroll > 0) {
+        _scrollProgress.value = (currentScroll / maxScroll).clamp(0.0, 1.0);
+      }
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrollProgress.dispose();
     super.dispose();
   }
 
-
-
   Future<void> _checkOfflineStatus() async {
     try {
-      final isSaved = await DatabaseHelper.instance.isPostSavedOffline(widget.post.id);
+      final isSaved = await DatabaseHelper.instance.isPostSavedOffline(
+        widget.post.id,
+      );
       if (mounted) {
         setState(() {
           _isSavedOffline = isSaved;
@@ -163,9 +189,13 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
             _isSavedOffline = false;
           });
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Artikel dihapus dari penyimpanan offline')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Artikel dihapus dari penyimpanan offline'),
+            ),
+          );
+        }
       } else {
         // Save for offline reading
         await DatabaseHelper.instance.savePostForOffline(widget.post);
@@ -174,15 +204,21 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
             _isSavedOffline = true;
           });
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Artikel disimpan untuk dibaca offline')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Artikel disimpan untuk dibaca offline'),
+            ),
+          );
+        }
       }
     } catch (e) {
       _logger.severe('Failed to toggle offline save: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyimpan artikel: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan artikel: $e')));
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -195,7 +231,8 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
   void _showShareDialog() {
     final articleTitle = unescape.convert(widget.post.title);
     final articleUrl = widget.post.link;
-    final shareText = 'Baca tulisan menarik "$articleTitle" di BacaPetra\n\n$articleUrl';
+    final shareText =
+        'Baca tulisan menarik "$articleTitle" di BacaPetra\n\n$articleUrl';
 
     showModalBottomSheet(
       context: context,
@@ -218,9 +255,9 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
             ),
             Text(
               'Bagikan Artikel',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -230,9 +267,9 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
               ),
               title: const Text('Bagikan'),
               subtitle: const Text('Kirim ke aplikasi lain'),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                Share.share(shareText, subject: articleTitle);
+                Share.share(shareText);
               },
             ),
             ListTile(
@@ -247,27 +284,32 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link berhasil disalin ke clipboard')),
+                    const SnackBar(
+                      content: Text('Link berhasil disalin ke clipboard'),
+                    ),
                   );
                 }
               },
             ),
             ListTile(
-              leading: Icon(
-                Icons.message,
-                color: Colors.green,
-              ),
+              leading: Icon(Icons.message, color: Colors.green),
               title: const Text('WhatsApp'),
               subtitle: const Text('Bagikan via WhatsApp'),
               onTap: () async {
                 Navigator.pop(context);
-                final whatsappUrl = 'https://wa.me/?text=${Uri.encodeComponent(shareText)}';
+                final whatsappUrl =
+                    'https://wa.me/?text=${Uri.encodeComponent(shareText)}';
                 if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
-                  await launchUrl(Uri.parse(whatsappUrl), mode: LaunchMode.externalApplication);
+                  await launchUrl(
+                    Uri.parse(whatsappUrl),
+                    mode: LaunchMode.externalApplication,
+                  );
                 } else {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('WhatsApp tidak terinstall')),
+                      const SnackBar(
+                        content: Text('WhatsApp tidak terinstall'),
+                      ),
                     );
                   }
                 }
@@ -288,7 +330,9 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
         actions: [
           Consumer<BookmarkProvider>(
             builder: (context, bookmarkProvider, child) {
-              final isBookmarked = bookmarkProvider.isBookmarked(widget.post.id);
+              final isBookmarked = bookmarkProvider.isBookmarked(
+                widget.post.id,
+              );
               return IconButton(
                 icon: Icon(
                   isBookmarked ? Icons.bookmark : Icons.bookmark_border,
@@ -312,7 +356,9 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                     color: _isSavedOffline ? Colors.green.shade600 : null,
                   ),
             onPressed: _toggleOfflineSave,
-            tooltip: _isSavedOffline ? 'Hapus dari offline' : 'Simpan untuk offline',
+            tooltip: _isSavedOffline
+                ? 'Hapus dari offline'
+                : 'Simpan untuk offline',
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -332,9 +378,18 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'increase', child: Text('Perbesar Font')),
-                  const PopupMenuItem(value: 'decrease', child: Text('Perkecil Font')),
-                  const PopupMenuItem(value: 'reset', child: Text('Reset Font')),
+                  const PopupMenuItem(
+                    value: 'increase',
+                    child: Text('Perbesar Font'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'decrease',
+                    child: Text('Perkecil Font'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'reset',
+                    child: Text('Reset Font'),
+                  ),
                 ],
                 icon: const Icon(Icons.format_size),
               );
@@ -342,173 +397,224 @@ class _DetailArtikelScreenState extends State<DetailArtikelScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Article Content
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.post.imageUrl != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Hero(
-                          tag: 'post-image-${widget.post.id}',
-                          child: Image.network(
-                            widget.post.imageUrl!,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(child: CircularProgressIndicator());
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.broken_image, size: 50);
-                            },
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Article Content
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (widget.post.imageUrl != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Hero(
+                              tag:
+                                  widget.heroTag ??
+                                  'post-image-${widget.post.id}',
+                              child: CachedNetworkImage(
+                                imageUrl: widget.post.imageUrl!,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const SizedBox(
+                                  height: 200,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.broken_image, size: 50),
+                              ),
+                            ),
                           ),
                         ),
+                      Text(
+                        unescape.convert(widget.post.title),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  Text(
-                    unescape.convert(widget.post.title),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _readingTime,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Consumer<FontSizeProvider>(
+                        builder: (context, fontSizeProvider, child) {
+                          return Html(
+                            data: unescape.convert(widget.post.content),
+                            style: {
+                              "body": Style(
+                                fontSize: FontSize(
+                                  18.0 * fontSizeProvider.fontSizeScale,
+                                ),
+                                lineHeight: LineHeight.number(1.5),
+                              ),
+                              "p": Style(margin: Margins.only(bottom: 16.0)),
+                              "hr": Style(
+                                margin: Margins.symmetric(vertical: 24.0),
+                                border: const Border(
+                                  bottom: BorderSide(
+                                    color: Colors.grey,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              "a": Style(
+                                color: Colors.blue.shade800,
+                                textDecoration: TextDecoration.none,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            },
+                            onLinkTap:
+                                (
+                                  String? url,
+                                  Map<String, String> attributes,
+                                  element,
+                                ) {
+                                  _handleLinkTap(context, url);
+                                },
+                            // Performance optimization
+                            shrinkWrap: true,
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
+                ),
+
+                // Comments Section
+                CommentsSection(post: widget.post),
+
+                // Share Section at the end of article
+                Container(
+                  margin: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
                     children: [
                       Icon(
-                        Icons.access_time,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.secondary,
+                        Icons.share,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(height: 12),
                       Text(
-                        calculateReadingTime(widget.post.content),
+                        'Menikmati artikel ini?',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Bagikan dengan teman-teman Anda agar mereka juga bisa menikmati tulisan menarik ini.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontWeight: FontWeight.w500,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _showShareDialog,
+                              icon: const Icon(Icons.share),
+                              label: const Text('Bagikan'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                await Clipboard.setData(
+                                  ClipboardData(text: widget.post.link),
+                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Link berhasil disalin ke clipboard',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.copy),
+                              label: const Text('Salin Link'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Consumer<FontSizeProvider>(
-                    builder: (context, fontSizeProvider, child) {
-                      return Html(
-                        data: unescape.convert(widget.post.content),
-                        style: {
-                          "body": Style(
-                            fontSize: FontSize(18.0 * fontSizeProvider.fontSizeScale),
-                            lineHeight: LineHeight.number(1.5),
-                          ),
-                          "p": Style(
-                            margin: Margins.only(bottom: 16.0),
-                          ),
-                          "hr": Style(
-                            margin: Margins.symmetric(vertical: 24.0),
-                            border: const Border(bottom: BorderSide(color: Colors.grey, width: 1)),
-                          ),
-                          "a": Style(
-                            color: Colors.blue.shade800,
-                            textDecoration: TextDecoration.none,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        },
-                        onLinkTap: (String? url, Map<String, String> attributes, element) {
-                          _handleLinkTap(context, url);
-                        },
-                        // Performance optimization
-                        shrinkWrap: true,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Comments Section
-            CommentsSection(post: widget.post),
-
-            // Share Section at the end of article
-            Container(
-              margin: const EdgeInsets.all(16.0),
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.share,
-                    size: 32,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Menikmati artikel ini?',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Bagikan dengan teman-teman Anda agar mereka juga bisa menikmati tulisan menarik ini.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _showShareDialog,
-                          icon: const Icon(Icons.share),
-                          label: const Text('Bagikan'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await Clipboard.setData(ClipboardData(text: widget.post.link));
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Link berhasil disalin ke clipboard')),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.copy),
-                          label: const Text('Salin Link'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Reading Progress Bar - Wrapped in ValueListenableBuilder for performance
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollProgress,
+              builder: (context, progress, child) {
+                return LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                  minHeight: 3,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -166,10 +166,10 @@ class _PopularScreenState extends State<PopularScreen> {
                                     return Chip(
                                       label: Text(category),
                                       labelStyle: const TextStyle(fontSize: 12),
-                                      backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                      backgroundColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20.0),
-                                        side: BorderSide(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
+                                        side: BorderSide(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)),
                                       ),
                                     );
                                   }).toList(),

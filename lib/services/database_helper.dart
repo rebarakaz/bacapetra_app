@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import '../models/post.dart';
 
 class DatabaseHelper {
@@ -181,7 +180,7 @@ class DatabaseHelper {
     final posts = await getOfflinePosts();
     int totalSize = 0;
     for (final post in posts) {
-      totalSize += post.title.length + post.content.length + (post.excerpt?.length ?? 0);
+      totalSize += post.title.length + post.content.length + post.excerpt.length;
     }
 
     return {

@@ -6,6 +6,7 @@ import '../services/api_service.dart'; // Import ApiService
 import '../models/post.dart';
 import '../utils/html_utils.dart';
 import 'package:logging/logging.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 final Logger _logger = Logger('BerandaScreen');
 
@@ -101,10 +102,13 @@ class _BerandaScreenState extends State<BerandaScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'Populer',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                  ),
                             ),
                           ],
                         ),
@@ -112,14 +116,19 @@ class _BerandaScreenState extends State<BerandaScreen> {
                       FutureBuilder<List<Post>>(
                         future: futurePopularPosts,
                         builder: (context, popularSnapshot) {
-                          if (popularSnapshot.connectionState == ConnectionState.waiting) {
+                          if (popularSnapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const SizedBox(
                               height: 120,
                               child: Center(child: CircularProgressIndicator()),
                             );
-                          } else if (popularSnapshot.hasData && popularSnapshot.data!.isNotEmpty) {
+                          } else if (popularSnapshot.hasData &&
+                              popularSnapshot.data!.isNotEmpty) {
                             // Filter posts that have comments (commentCount > 0)
-                            final postsWithComments = popularSnapshot.data!.where((post) => post.commentCount > 0).take(5).toList();
+                            final postsWithComments = popularSnapshot.data!
+                                .where((post) => post.commentCount > 0)
+                                .take(5)
+                                .toList();
 
                             if (postsWithComments.isEmpty) {
                               return const SizedBox.shrink(); // Don't show section if no posts have comments
@@ -129,7 +138,9 @@ class _BerandaScreenState extends State<BerandaScreen> {
                               height: 200,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                ),
                                 itemCount: postsWithComments.length,
                                 itemBuilder: (context, index) {
                                   Post post = postsWithComments[index];
@@ -138,57 +149,85 @@ class _BerandaScreenState extends State<BerandaScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => DetailArtikelScreen(post: post),
+                                          builder: (context) => DetailArtikelScreen(
+                                            post: post,
+                                            heroTag:
+                                                'popular-post-image-${post.id}',
+                                          ),
                                         ),
                                       );
                                     },
                                     child: Container(
                                       width: 160,
-                                      margin: const EdgeInsets.only(right: 12.0),
+                                      margin: const EdgeInsets.only(
+                                        right: 12.0,
+                                      ),
                                       child: Card(
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(
+                                            8.0,
+                                          ),
                                         ),
-                                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                                        clipBehavior:
+                                            Clip.antiAliasWithSaveLayer,
                                         elevation: 3,
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             if (post.imageUrl != null)
                                               Hero(
-                                                tag: 'popular-post-image-${post.id}',
-                                                child: Image.network(
-                                                  post.imageUrl!,
+                                                tag:
+                                                    'popular-post-image-${post.id}',
+                                                child: CachedNetworkImage(
+                                                  imageUrl: post.imageUrl!,
                                                   width: double.infinity,
                                                   height: 100,
                                                   fit: BoxFit.cover,
-                                                  loadingBuilder: (context, child, loadingProgress) {
-                                                    if (loadingProgress == null) return child;
-                                                    return const SizedBox(
-                                                      height: 100,
-                                                      child: Center(child: CircularProgressIndicator()),
-                                                    );
-                                                  },
-                                                  errorBuilder: (context, error, stackTrace) {
-                                                    return const SizedBox(
-                                                      height: 100,
-                                                      child: Icon(Icons.broken_image, size: 20),
-                                                    );
-                                                  },
+                                                  placeholder: (context, url) =>
+                                                      const SizedBox(
+                                                        height: 100,
+                                                        child: Center(
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        ),
+                                                      ),
+                                                  errorWidget:
+                                                      (
+                                                        context,
+                                                        url,
+                                                        error,
+                                                      ) => const SizedBox(
+                                                        height: 100,
+                                                        child: Icon(
+                                                          Icons.broken_image,
+                                                          size: 20,
+                                                        ),
+                                                      ),
                                                 ),
                                               ),
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    unescape.convert(post.title),
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                      fontWeight: FontWeight.bold,
+                                                    unescape.convert(
+                                                      post.title,
                                                     ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Row(
@@ -196,15 +235,25 @@ class _BerandaScreenState extends State<BerandaScreen> {
                                                       Icon(
                                                         Icons.comment,
                                                         size: 12,
-                                                        color: Theme.of(context).colorScheme.secondary,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.secondary,
                                                       ),
                                                       const SizedBox(width: 2),
                                                       Text(
                                                         '${post.commentCount} komentar',
-                                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                          color: Theme.of(context).colorScheme.secondary,
-                                                          fontSize: 10,
-                                                        ),
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.copyWith(
+                                                              color:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      )
+                                                                      .colorScheme
+                                                                      .secondary,
+                                                              fontSize: 10,
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -226,12 +275,14 @@ class _BerandaScreenState extends State<BerandaScreen> {
                       ),
                       const Divider(),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
                         child: Text(
                           'Semua Tulisan',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -239,116 +290,143 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 ),
                 // Regular Posts List
                 SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      Post post = snapshot.data![index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailArtikelScreen(post: post),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    Post post = snapshot.data![index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DetailArtikelScreen(post: post),
                           ),
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
-                          elevation: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (post.imageUrl != null)
-                                Hero(
-                                  tag: 'post-image-${post.id}',
-                                  child: Image.network(
-                                    post.imageUrl!,
-                                    width: double.infinity,
+                        );
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 12.0,
+                          horizontal: 16.0,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        elevation: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (post.imageUrl != null)
+                              Hero(
+                                tag: 'post-image-${post.id}',
+                                child: CachedNetworkImage(
+                                  imageUrl: post.imageUrl!,
+                                  width: double.infinity,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const SizedBox(
                                     height: 200,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(32.0),
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const SizedBox(
-                                        height: 200,
-                                        child: Icon(Icons.broken_image, size: 40),
-                                      );
-                                    },
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   ),
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (post.categories.isNotEmpty)
-                                      Wrap(
-                                        spacing: 8.0,
-                                        runSpacing: 4.0,
-                                        children: post.categories.map((category) {
-                                          return Chip(
-                                            label: Text(category),
-                                            labelStyle: const TextStyle(fontSize: 12),
-                                            backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(20.0),
-                                              side: BorderSide(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      unescape.convert(post.title),
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      unescape.convert(post.excerpt.replaceAll(RegExp(r'<[^>]*>'), '')),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          size: 16,
-                                          color: Theme.of(context).colorScheme.secondary,
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox(
+                                        height: 200,
+                                        child: Icon(
+                                          Icons.broken_image,
+                                          size: 40,
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          calculateReadingTime(post.content),
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.secondary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
                                 ),
                               ),
-                            ],
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (post.categories.isNotEmpty)
+                                    Wrap(
+                                      spacing: 8.0,
+                                      runSpacing: 4.0,
+                                      children: post.categories.map((category) {
+                                        return Chip(
+                                          label: Text(category),
+                                          labelStyle: const TextStyle(
+                                            fontSize: 12,
+                                          ),
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                              .withValues(alpha: 0.1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              20.0,
+                                            ),
+                                            side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary
+                                                  .withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    unescape.convert(post.title),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    unescape.convert(
+                                      post.excerpt.replaceAll(
+                                        RegExp(r'<[^>]*>'),
+                                        '',
+                                      ),
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time,
+                                        size: 16,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        calculateReadingTime(post.content),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.secondary,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                    childCount: snapshot.data!.length,
-                  ),
+                      ),
+                    );
+                  }, childCount: snapshot.data!.length),
                 ),
               ],
             ),

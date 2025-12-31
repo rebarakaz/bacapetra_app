@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/comment.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';

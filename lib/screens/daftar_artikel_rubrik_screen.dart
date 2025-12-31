@@ -76,7 +76,7 @@ class _DaftarArtikelRubrikScreenState extends State<DaftarArtikelRubrikScreen> {
 
       // Only show error for actual network/server errors, not for empty categories
       final errorString = e.toString();
-      if (!errorString.contains('Status: 400') && !errorString.contains('empty')) {
+      if (!errorString.contains('Status: 400') && !errorString.contains('empty') && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal memuat tulisan: $e')),
         );
@@ -183,10 +183,10 @@ class _DaftarArtikelRubrikScreenState extends State<DaftarArtikelRubrikScreen> {
                               return Chip(
                                 label: Text(category),
                                 labelStyle: const TextStyle(fontSize: 12),
-                                backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                backgroundColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),
-                                  side: BorderSide(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
+                                  side: BorderSide(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)),
                                 ),
                               );
                             }).toList(),

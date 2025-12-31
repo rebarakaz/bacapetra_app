@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'providers/theme_provider.dart';
 import 'providers/bookmark_provider.dart';
 import 'providers/font_size_provider.dart';
@@ -101,20 +102,16 @@ class _MainScreenState extends State<MainScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     BerandaScreen(),
     RubrikScreen(),
-    CariScreen(),
     PopularScreen(),
     KirimTulisanScreen(),
-    // NetworkTestScreen() removed
   ];
 
   // Judul untuk halaman (BookmarkScreen dipindah ke drawer)
   static const List<String> _titleOptions = <String>[
     'Beranda',
     'Rubrik',
-    'Cari Tulisan',
     'Populer',
-    'Kirim Tulisan',
-    // 'Network Test' removed
+    'Menulis',
   ];
 
   void _onItemTapped(int index) {
@@ -129,6 +126,16 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text(_titleOptions[_selectedIndex]),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CariScreen()),
+              );
+            },
+            tooltip: 'Cari Tulisan',
+          ),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
@@ -144,7 +151,6 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
         ],
-
       ),
       drawer: Drawer(
         child: ListView(
@@ -154,11 +160,21 @@ class _MainScreenState extends State<MainScreen> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.menu_book,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 35,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
                     'BacaPetra',
                     style: TextStyle(
                       color: Colors.white,
@@ -166,13 +182,9 @@ class _MainScreenState extends State<MainScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Menjadi Baik dengan Membaca',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -193,8 +205,8 @@ class _MainScreenState extends State<MainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.bookmarks),
-              title: const Text('Tersimpan'),
-              subtitle: const Text('Artikel yang disimpan'),
+              title: const Text('Bookmark'),
+              subtitle: const Text('Artikel favorit Anda'),
               onTap: () {
                 Navigator.pop(context); // Close drawer
                 Navigator.push(
@@ -206,6 +218,38 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                'Media Sosial',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text('Website'),
+              onTap: () async {
+                final uri = Uri.parse('https://www.bacapetra.co');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Instagram'),
+              onTap: () async {
+                final uri = Uri.parse('https://www.instagram.com/bacapetra');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.info),
               title: const Text('Tentang Aplikasi'),
@@ -214,17 +258,17 @@ class _MainScreenState extends State<MainScreen> {
                 showAboutDialog(
                   context: context,
                   applicationName: 'BacaPetra',
-                  applicationVersion: '1.1.0',
+                  applicationVersion: '1.2.0',
                   applicationLegalese: '© 2025 Yayasan Klub Buku Petra',
                   children: [
                     const SizedBox(height: 16),
                     const Text(
                       'Platform literasi digital untuk komunitas sastra Indonesia. '
-                      'Temukan, baca, dan bagikan karya-karya menarik dari berbagai penulis.\n\n'
-                      'Dioperasikan oleh Yayasan Klub Buku Petra, '
-                      'organisasi nirlaba yang telah berkontribusi untuk komunitas literasi '
-                      'Indonesia selama hampir 7 tahun.\n\n'
-                      'Developed by Chrisnov IT Solutions',
+                      'BacaPetra hadir sebagai ruang bagi para penulis dan pembaca untuk saling berbagi gagasan, rasa, dan karya.\n\n'
+                      'Yayasan Klub Buku Petra adalah organisasi nirlaba di Ruteng, Flores, NTT '
+                      'yang berfokus pada pengembangan literasi, budaya, dan pendidikan di Indonesia Timur.\n\n'
+                      'Developed by Chrisnov IT Solutions\n'
+                      '© 2025 Yayasan Klub Buku Petra',
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -240,16 +284,14 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Rubrik'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_up),
             label: 'Populer',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.edit_document),
-            label: 'Kirim Tulisan',
+            label: 'Menulis',
           ),
-          // NetworkTestScreen() removed
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).colorScheme.secondary,

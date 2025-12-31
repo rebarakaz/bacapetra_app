@@ -70,9 +70,11 @@ class _HasilPencarianScreenState extends State<HasilPencarianScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat hasil: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat hasil: $e')),
+        );
+      }
     }
   }
 

@@ -8,18 +8,21 @@ A modern Flutter application for reading articles from BacaPetra (bacapetra.co),
 
 ## ✨ Features
 
-- 📖 **Article Reading**: Browse and read articles from BacaPetra
+- 📖 **Article Reading**: Browse and read articles from BacaPetra with smooth scrolling
+- 📊 **Reading Progress Bar**: Visual indicator showing your reading progress in articles
 - 🏷️ **Categories**: Explore articles by categories/rubrics
 - 👤 **Authors**: Discover articles by specific authors
-- 🔍 **Search**: Find articles with powerful search functionality
+- 🔍 **Smart Search**: Find articles with powerful search functionality (accessible from AppBar)
 - 🔥 **Popular Posts**: Discover trending articles based on community engagement
 - 🔖 **Bookmarks**: Save favorite articles for later reading
 - 💬 **Comments**: View and interact with article comments
 - 📱 **Offline Reading**: Save articles for offline access
+- 🚀 **Image Caching**: Faster loading and reduced data usage with intelligent image caching
 - 🔤 **Font Scaling**: Adjustable font size for better readability (70%-150%)
 - 🌙 **Theme Support**: Light, dark, and system theme modes
 - 🌐 **WebView Integration**: Open external links seamlessly
-- 📱 **Responsive Design**: Optimized for mobile devices
+- 🔗 **Social Media Links**: Quick access to BacaPetra's website and Instagram
+- 📱 **Responsive Design**: Optimized for mobile devices with improved navigation UX
 
 ## 🏗️ Architecture
 
@@ -71,9 +74,9 @@ lib/
 
 ## 📥 Download
 
-[![Download APK](https://img.shields.io/badge/Download-APK-blue?style=for-the-badge&logo=android)](https://github.com/rebarakaz/bacapetra_app/releases/latest/download/BacaPetra-v1.1.0.apk)
+[![Download APK](https://img.shields.io/badge/Download-APK-blue?style=for-the-badge&logo=android)](https://github.com/rebarakaz/bacapetra_app/releases/latest/download/BacaPetra-v1.2.0.apk)
 
-**Latest Release:** [v1.1.0](https://github.com/rebarakaz/bacapetra_app/releases/tag/v1.1.0)
+**Latest Release:** [v1.2.0](https://github.com/rebarakaz/bacapetra_app/releases/tag/v1.2.0)
 
 ### Build for Production
 
@@ -113,6 +116,7 @@ flutter build ios --release
 - **HTML Unescape**: HTML content processing
 - **Shared Preferences**: Local data persistence
 - **SQLite**: Offline data storage
+- **Cached Network Image**: Intelligent image caching for performance
 - **URL Launcher**: External link handling
 - **Share Plus**: Social sharing functionality
 - **WebView Flutter**: In-app web content display

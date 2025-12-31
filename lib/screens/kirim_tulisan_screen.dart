@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/style/fontsize.dart';
 // import 'package:flutter_html/html_parser.dart' as dom;
 import 'package:html/dom.dart' as html;
 import '../models/post.dart';

@@ -299,10 +299,10 @@ class _OfflineScreenState extends State<OfflineScreen> {
                                       return Chip(
                                         label: Text(category),
                                         labelStyle: const TextStyle(fontSize: 10),
-                                        backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                        backgroundColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(16.0),
-                                          side: BorderSide(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
+                                          side: BorderSide(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)),
                                         ),
                                       );
                                     }).toList(),
