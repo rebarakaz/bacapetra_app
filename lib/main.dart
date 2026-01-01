@@ -167,10 +167,20 @@ class _MainScreenState extends State<MainScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.menu_book,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 35,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo.jpg',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.menu_book,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 35,
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
