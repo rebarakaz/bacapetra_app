@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/dev/bacapetra_app/windows"
+    "cmake.sourceDirectory": "D:/dev/bacapetra_app/windows",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

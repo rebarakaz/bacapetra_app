@@ -243,7 +243,7 @@ class _MainScreenState extends State<MainScreen> {
               leading: const Icon(Icons.camera_alt_outlined),
               title: const Text('Instagram'),
               onTap: () async {
-                final uri = Uri.parse('https://www.instagram.com/bacapetra');
+                final uri = Uri.parse('https://www.instagram.com/klubbukupetra');
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 }

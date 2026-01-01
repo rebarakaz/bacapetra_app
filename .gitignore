@@ -71,6 +71,7 @@ build_log.txt
 
 # Beta/Development documentation
 BETA_README.md
+future_feature_roadmap.md
 
 # IDE-specific files
 .qoderignore
