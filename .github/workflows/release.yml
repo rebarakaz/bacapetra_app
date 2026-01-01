@@ -13,25 +13,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean Flutter cache
+        run: flutter clean
+
+      - name: Clean Gradle cache completely
+        run: |
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf android/.gradle/
+          rm -rf android/build/
+
+      - name: Clean all Flutter and Android caches
+        run: |
+          flutter pub cache clean
+          flutter pub cache repair
+          
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Flutter
+      - name: Setup Flutter with specific version
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          flutter-version: '3.24.5'
 
-      - name: Clean Flutter cache
-        run: flutter clean
-
-      - name: Clean Gradle cache
+      - name: Verify Android Gradle plugin version
         run: |
-          rm -rf ~/.gradle/caches/
-          rm -rf android/.gradle/
-
+          echo "Checking Android Gradle plugin version in settings.gradle.kts"
+          grep "com.android.application" android/settings.gradle.kts
+          
       - name: Get dependencies
         run: flutter pub get
 
