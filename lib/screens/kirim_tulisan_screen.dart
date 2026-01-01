@@ -61,22 +61,17 @@ class _KirimTulisanScreenState extends State<KirimTulisanScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tampilkan judul halaman sebagai header
-                  Text(
-                    unescape.convert(pageData.title),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Gunakan flutter_html untuk merender kontennya
+                  // Gunakan flutter_html untuk merender kontennya (tanpa menampilkan judul halaman)
                   Consumer<FontSizeProvider>(
                     builder: (context, fontSizeProvider, child) {
                       return Html(
                         data: unescape.convert(pageData.content),
                         style: {
-                          // Aturan ini akan menyembunyikan tag judul dari konten
+                          // Aturan ini akan menyembunyikan semua tag judul dari konten
                           "h1": Style(
+                            display: Display.none,
+                          ),
+                          "h2, h3, h4, h5, h6": Style(
                             display: Display.none,
                           ),
                           "body": Style(fontSize: FontSize(18.0 * fontSizeProvider.fontSizeScale), lineHeight: LineHeight.number(1.5)),
