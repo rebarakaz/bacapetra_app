@@ -63,10 +63,10 @@ flutter {
     source = "../.."
 }
 
-dependencies {
-    constraints {
-        implementation("androidx.core:core:1.13.1")
-        implementation("androidx.core:core-ktx:1.13.1")
-        implementation("androidx.browser:browser:1.8.0")
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core:1.13.1")
+        force("androidx.core:core-ktx:1.13.1")
+        force("androidx.browser:browser:1.8.0")
     }
 }
