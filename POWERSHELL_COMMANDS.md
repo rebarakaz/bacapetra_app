@@ -3,11 +3,13 @@
 ## 🔍 Git Status & File Checking
 
 ### Cek status git
+
 ```powershell
 git status
 ```
 
 ### Cek apakah file tertentu ada di git status (alternatif grep)
+
 ```powershell
 # Cek apakah key.properties muncul di git status
 git status | Select-String "key.properties"
@@ -17,6 +19,7 @@ git ls-files | Select-String "key.properties"
 ```
 
 ### Lihat file yang diabaikan gitignore
+
 ```powershell
 git status --ignored
 ```
@@ -24,6 +27,7 @@ git status --ignored
 ## 🗑️ Menghapus File
 
 ### Hapus file log (PowerShell)
+
 ```powershell
 # Hapus semua file .log
 Remove-Item *.log -ErrorAction SilentlyContinue
@@ -36,6 +40,7 @@ Remove-Item -Recurse -Force build
 ```
 
 ### Hapus file dari Git tracking (tapi tetap di lokal)
+
 ```powershell
 # Hapus key.properties dari git tracking
 git rm --cached android/key.properties
@@ -47,17 +52,20 @@ git rm -r --cached android/app/build
 ## 📦 Flutter Commands
 
 ### Build APK Release
+
 ```powershell
 flutter build apk --release
 ```
 
 ### Clean build
+
 ```powershell
 flutter clean
 flutter pub get
 ```
 
 ### Run debug
+
 ```powershell
 flutter run --debug
 ```
@@ -65,22 +73,26 @@ flutter run --debug
 ## 🚀 Git Release Workflow (PowerShell)
 
 ### 1. Lihat perubahan
+
 ```powershell
 git status
 git diff
 ```
 
 ### 2. Add semua perubahan
+
 ```powershell
 git add .
 ```
 
 ### 3. Commit
+
 ```powershell
 git commit -m "Release v1.2.0: Performance improvements and UX enhancements"
 ```
 
 ### 4. Create dan push tag
+
 ```powershell
 # Buat tag
 git tag v1.2.0
@@ -91,6 +103,7 @@ git push origin v1.2.0
 ```
 
 ### 5. Jika perlu hapus tag (rollback)
+
 ```powershell
 # Hapus tag lokal
 git tag -d v1.2.0
@@ -102,6 +115,7 @@ git push origin --delete v1.2.0
 ## 🔐 Security Check
 
 ### Cek apakah file sensitif ter-track
+
 ```powershell
 # Cek key.properties
 git ls-files | Select-String "key.properties"
@@ -112,6 +126,7 @@ git ls-files | Select-String ".keystore"
 ```
 
 ### Jika file sensitif sudah ter-commit (DANGER!)
+
 ```powershell
 # HATI-HATI: Ini akan rewrite history!
 git filter-branch --force --index-filter `
@@ -125,6 +140,7 @@ git push origin --force --all
 ## 📁 File Management
 
 ### Lihat isi folder
+
 ```powershell
 # List semua file
 Get-ChildItem
@@ -137,11 +153,13 @@ Get-ChildItem -Recurse -Filter "*.apk"
 ```
 
 ### Copy file
+
 ```powershell
 Copy-Item source.txt destination.txt
 ```
 
 ### Move file
+
 ```powershell
 Move-Item old-name.txt new-name.txt
 ```
@@ -149,6 +167,7 @@ Move-Item old-name.txt new-name.txt
 ## 🔄 Quick Commands untuk Release
 
 ### Pre-release checklist
+
 ```powershell
 # 1. Clean dan test
 flutter clean
@@ -173,6 +192,7 @@ git push origin v1.2.0
 ## 💡 Tips PowerShell
 
 ### Buat alias untuk command yang sering dipakai
+
 ```powershell
 # Tambahkan ke $PROFILE
 Set-Alias -Name frun -Value "flutter run --debug"
@@ -180,11 +200,13 @@ Set-Alias -Name fbuild -Value "flutter build apk --release"
 ```
 
 ### Lihat history command
+
 ```powershell
 Get-History
 ```
 
 ### Clear terminal
+
 ```powershell
 Clear-Host
 # atau
@@ -194,6 +216,7 @@ cls
 ## 🆘 Troubleshooting
 
 ### Git tidak mengenali perubahan gitignore
+
 ```powershell
 # Clear git cache
 git rm -r --cached .
@@ -202,6 +225,7 @@ git commit -m "Update gitignore"
 ```
 
 ### Flutter build error
+
 ```powershell
 # Full clean
 flutter clean
@@ -211,6 +235,7 @@ flutter pub upgrade
 ```
 
 ### Gradle build error
+
 ```powershell
 # Clean gradle
 cd android

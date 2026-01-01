@@ -28,7 +28,7 @@ A modern Flutter application for reading articles from BacaPetra (bacapetra.co),
 
 This app follows Flutter best practices with a well-organized structure:
 
-```
+```markdown
 lib/
 ├── models/          # Data models (Post, Category, Author)
 ├── providers/       # State management (Theme, Bookmarks)
@@ -57,17 +57,20 @@ lib/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/rebarakaz/bacapetra_app.git
    cd bacapetra_app
    ```
 
 2. **Install dependencies**
+
    ```bash
    flutter pub get
    ```
 
 3. **Run the app**
+
    ```bash
    flutter run
    ```
@@ -81,11 +84,13 @@ lib/
 ### Build for Production
 
 **Android APK:**
+
 ```bash
 flutter build apk --release
 ```
 
 **iOS (on macOS):**
+
 ```bash
 flutter build ios --release
 ```
@@ -93,18 +98,23 @@ flutter build ios --release
 ## 📱 Screenshots
 
 ### Home Screen - Article Feed
+
 <img src="assets/images/beranda.jpg" alt="Home Screen" width="300">
 
 ### Categories - Browse by Topics
+
 <img src="assets/images/rubrik.jpg" alt="Categories Screen" width="300">
 
 ### Search - Find Articles
+
 <img src="assets/images/cari.jpg" alt="Search Screen" width="300">
 
 ### Bookmarks - Saved Articles
+
 <img src="assets/images/bookmark.jpg" alt="Bookmarks Screen" width="300">
 
 ### Submit Article - Contribute Content
+
 <img src="assets/images/kirim_tulisan.jpg" alt="Submit Article Screen" width="300">
 
 ## 🛠️ Technologies Used
@@ -131,7 +141,7 @@ The app uses the following key configurations:
 
 ## 📂 Project Structure Details
 
-```
+```markdown
 lib/
 ├── main.dart                    # App entry point
 ├── models/
