@@ -70,123 +70,47 @@ flutter pub get
 flutter run --debug
 ```
 
-## 🚀 Git Release Workflow (PowerShell)
+## 🚀 Alur Kerja Rilis Otomatis (via GitHub Actions)
 
-### 1. Lihat perubahan
+Proses rilis sekarang sepenuhnya otomatis.
+Anda tidak perlu lagi build APK secara manual.
+
+### 1. Persiapan
+
+Pastikan semua perubahan kode sudah di-commit dan Anda sudah membuat file
+`RELEASE_NOTES_vX.X.X.md` yang sesuai.
 
 ```powershell
-git status
-git diff
-```
-
-### 2. Add semua perubahan
-
-```powershell
+# Contoh: commit semua perubahan
 git add .
+git commit -m "Fitur baru untuk v1.2.0"
+git push origin main
 ```
 
-### 3. Commit
+### 2. Memicu Rilis
+
+Cukup buat tag baru dan push tag tersebut ke remote. Hal ini akan secara otomatis
+memulai proses build dan rilis di GitHub.
 
 ```powershell
-git commit -m "Release v1.2.0: Performance improvements and UX enhancements"
-```
+# Ganti v1.2.0 dengan versi baru Anda
+git tag -a v1.2.0 -m "Release v1.2.0"
 
-### 4. Create dan push tag
-
-```powershell
-# Buat tag
-git tag v1.2.0
-
-# Push commit dan tag
-git push origin master
+# Push tag untuk memulai automasi
 git push origin v1.2.0
 ```
 
-### 5. Jika perlu hapus tag (rollback)
+Setelah push, periksa tab "Actions" di repositori GitHub Anda
+untuk melihat prosesnya berjalan.
+
+### Jika Perlu Membatalkan Rilis (Rollback Tag)
 
 ```powershell
 # Hapus tag lokal
 git tag -d v1.2.0
 
-# Hapus tag remote
+# Hapus tag di remote
 git push origin --delete v1.2.0
-```
-
-## 🔐 Security Check
-
-### Cek apakah file sensitif ter-track
-
-```powershell
-# Cek key.properties
-git ls-files | Select-String "key.properties"
-
-# Cek semua keystore
-git ls-files | Select-String ".jks"
-git ls-files | Select-String ".keystore"
-```
-
-### Jika file sensitif sudah ter-commit (DANGER!)
-
-```powershell
-# HATI-HATI: Ini akan rewrite history!
-git filter-branch --force --index-filter `
-  "git rm --cached --ignore-unmatch android/key.properties" `
-  --prune-empty --tag-name-filter cat -- --all
-
-# Force push (DANGER!)
-git push origin --force --all
-```
-
-## 📁 File Management
-
-### Lihat isi folder
-
-```powershell
-# List semua file
-Get-ChildItem
-
-# List dengan detail
-Get-ChildItem -Force | Format-Table Name, Length, LastWriteTime
-
-# Cari file tertentu
-Get-ChildItem -Recurse -Filter "*.apk"
-```
-
-### Copy file
-
-```powershell
-Copy-Item source.txt destination.txt
-```
-
-### Move file
-
-```powershell
-Move-Item old-name.txt new-name.txt
-```
-
-## 🔄 Quick Commands untuk Release
-
-### Pre-release checklist
-
-```powershell
-# 1. Clean dan test
-flutter clean
-flutter pub get
-flutter analyze
-flutter test
-
-# 2. Build release APK
-flutter build apk --release
-
-# 3. Cek ukuran APK
-Get-Item build/app/outputs/flutter-apk/app-release.apk | Select-Object Name, Length
-
-# 4. Commit dan tag
-git add .
-git commit -m "Release v1.2.0"
-git tag v1.2.0
-git push origin master
-git push origin v1.2.0
 ```
 
 ## 💡 Tips PowerShell

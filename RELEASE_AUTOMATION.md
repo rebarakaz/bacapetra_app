@@ -1,134 +1,90 @@
-# Automated Release Guide
+# Panduan Rilis Otomatis
 
-## Overview
+## Gambaran Umum
 
-This repository now includes GitHub Actions automation for building and
-releasing APK files. You no longer need to manually build and upload APKs!
+Repositori ini sekarang menyertakan otomasi GitHub Actions untuk proses build dan
+rilis file APK. Anda tidak perlu lagi membuat dan mengunggah APK secara manual!
 
-## How It Works
+## Cara Kerja
 
-### Automatic Release Process
+### Proses Rilis Otomatis
 
-1. **Tag your commit** with a version number (e.g., `v1.2.0`)
-2. **Push the tag** to GitHub
-3. **GitHub Actions automatically**:
-   - Builds the release APK
-   - Creates a GitHub Release
-   - Uploads the APK to the release
-   - Uses your release notes file
+1. **Buat `tag` pada commit Anda** dengan nomor versi (contoh: `v1.2.0`).
+2. **Push `tag` tersebut** ke GitHub.
+3. **GitHub Actions akan secara otomatis**:
+    - Melakukan build untuk APK rilis.
+    - Membuat halaman GitHub Release baru.
+    - Mengunggah file APK ke halaman rilis tersebut.
+    - Menggunakan konten dari file catatan rilis Anda sebagai deskripsi.
 
-### Step-by-Step Instructions
+### Instruksi Langkah-demi-Langkah
 
-#### 1. Prepare Your Release
+#### 1. Persiapan Rilis
 
-Make sure all your changes are committed:
+Pastikan semua perubahan sudah di-commit dan Anda sudah membuat file catatan
+rilis (`RELEASE_NOTES_vX.X.X.md`).
 
 ```bash
+# Contoh commit
 git add .
-git commit -m "Release v1.2.0: Add reading progress bar and image caching"
+git commit -m "Rilis v1.2.0: Menambahkan progress bar dan cache gambar"
 ```
 
-#### 2. Create and Push a Version Tag
+#### 2. Buat dan Push Tag Versi
 
 ```bash
-# Create a tag (replace v1.2.0 with your version)
-git tag v1.2.0
+# Buat tag (ganti v1.2.0 dengan versi Anda)
+git tag -a v1.2.0 -m "Release v1.2.0"
 
-# Push the tag to GitHub
+# Push tag ke GitHub untuk memulai automasi
 git push origin v1.2.0
 ```
 
-#### 3. Wait for Automation
+#### 3. Tunggu Proses Otomatis Selesai
 
-- Go to your repository's "Actions" tab on GitHub
-- Watch the build process (takes ~5-10 minutes)
-- Once complete, check the "Releases" page
+- Buka tab "Actions" di repositori GitHub Anda.
+- Anda bisa memantau proses build (biasanya memakan waktu 5-10 menit).
+- Setelah selesai, periksa halaman "Releases" di repositori Anda.
 
-#### 4. Verify the Release
+#### 4. Verifikasi Rilis
 
-- The APK will be automatically uploaded
-- Release notes from `RELEASE_NOTES_v1.2.0.md` will be included
-- Download link will be available immediately
+- File APK akan terunggah secara otomatis.
+- Deskripsi rilis akan diisi dari file `RELEASE_NOTES_v1.2.0.md`.
+- Tautan unduhan akan langsung tersedia.
 
-## Release Notes Format
+## Format Catatan Rilis
 
-For each version, create a file named `RELEASE_NOTES_v{VERSION}.md`
-in the root directory:
+Untuk setiap versi, buat sebuah file dengan nama `RELEASE_NOTES_v{VERSI}.md`
+di direktori utama proyek.
 
-- Example: `RELEASE_NOTES_v1.2.0.md`
-- This file will be used as the release description
-- Include what's new, bug fixes, and breaking changes
+- Contoh: `RELEASE_NOTES_v1.2.0.md`
+- File ini akan digunakan sebagai deskripsi rilis.
+- Sertakan informasi seperti fitur baru, perbaikan bug, dan perubahan signifikan.
 
 ## Troubleshooting
 
-### Build Fails
+### Build Gagal
 
-- Check the Actions tab for error logs
-- Ensure `pubspec.yaml` version matches your tag
-- Verify all dependencies are correctly specified
+- Periksa log eror pada tab "Actions".
+- Pastikan versi di `pubspec.yaml` sesuai dengan tag Anda.
+- Verifikasi semua dependensi sudah benar.
 
-### Release Not Created
+### Rilis Tidak Dibuat
 
-- Ensure you pushed the **tag**, not just the commit
-- Tag must follow format: `v*.*.*` (e.g., `v1.2.0`)
-- Check GitHub Actions permissions in repository settings
+- Pastikan Anda melakukan push **tag**, bukan hanya commit (`git push origin v1.2.0`).
+- Tag harus mengikuti format `v*.*.*` (contoh: `v1.2.0`).
+- Periksa perizinan GitHub Actions di pengaturan repositori.
 
-### Manual Override
+### Override Manual
 
-If you need to build manually:
+Jika Anda terpaksa perlu melakukan build manual:
 
 ```bash
 flutter build apk --release
 ```
 
-The APK will be in: `build/app/outputs/flutter-apk/app-release.apk`
-
-## Version Numbering
-
-Follow semantic versioning:
-
-- **Major** (v2.0.0): Breaking changes
-- **Minor** (v1.2.0): New features, backward compatible
-- **Patch** (v1.2.1): Bug fixes only
-
-## Best Practices
-
-1. **Update version in `pubspec.yaml`** before tagging
-2. **Create release notes** before pushing tag
-3. **Test thoroughly** before creating a release tag
-4. **Use descriptive commit messages** for the release commit
-
-## Example Workflow
-
-```bash
-# 1. Update version in pubspec.yaml
-# version: 1.2.0+2
-
-# 2. Create release notes
-# Create RELEASE_NOTES_v1.2.0.md
-
-# 3. Commit changes
-git add .
-git commit -m "Release v1.2.0: Performance improvements and UX enhancements"
-
-# 4. Create and push tag
-git tag v1.2.0
-git push origin main
-git push origin v1.2.0
-
-# 5. Wait for GitHub Actions to complete
-# 6. Check Releases page for your new release!
-```
-
-## Need Help?
-
-If automation fails or you need to make changes:
-
-1. Delete the tag locally: `git tag -d v1.2.0`
-2. Delete the tag remotely: `git push origin :refs/tags/v1.2.0`
-3. Fix the issue
-4. Create the tag again
+File APK akan berada di: `build/app/outputs/flutter-apk/app-release.apk`
 
 ---
 
-> **Happy Releasing! 🚀**
+> **Selamat Merilis! 🚀**
